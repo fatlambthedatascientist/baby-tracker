@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-  <title>宝宝日常追踪 · 喂养记录</title>
+  <title>宝宝日常追踪</title>
   <style>
     * {
       margin: 0;
@@ -16,38 +16,23 @@
       background: #fef9f2;
       color: #4a4a4a;
       min-height: 100vh;
-      padding: 16px 12px 40px;
-      display: flex;
-      justify-content: center;
+      padding-bottom: 30px;
     }
 
-    .container {
-      max-width: 480px;
-      width: 100%;
+    .app-container {
+      max-width: 500px;
       margin: 0 auto;
-      display: flex;
-      flex-direction: column;
-      gap: 18px;
+      padding: 12px 14px 20px;
     }
 
     /* 标题 */
     .app-title {
       text-align: center;
-      font-size: 1.9rem;
-      font-weight: 600;
+      font-size: 1.6rem;
+      font-weight: 700;
       color: #7eb8da;
-      letter-spacing: 2px;
-      margin-bottom: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-    .app-title span {
-      background: #fff;
-      border-radius: 30px;
-      padding: 4px 16px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+      padding: 10px 0 6px;
+      letter-spacing: 1px;
     }
 
     /* 日期导航 */
@@ -55,67 +40,93 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      background: #ffffff;
-      border-radius: 40px;
-      padding: 8px 10px;
-      box-shadow: 0 6px 16px rgba(0,0,0,0.04);
-      gap: 6px;
+      background: #fff;
+      border-radius: 30px;
+      padding: 6px 8px;
+      margin: 10px 0 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+      gap: 4px;
     }
     .nav-btn {
       background: #eef6fb;
       border: none;
       border-radius: 50%;
-      width: 44px;
-      height: 44px;
-      font-size: 1.4rem;
+      width: 38px;
+      height: 38px;
+      font-size: 1.3rem;
       cursor: pointer;
       color: #5a9cbf;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: background 0.2s;
-      font-weight: 500;
+      font-weight: 600;
+      transition: 0.2s;
     }
     .nav-btn:active {
       background: #d4e7f5;
     }
     .date-display {
-      font-size: 1.15rem;
+      font-size: 1rem;
       font-weight: 600;
       color: #4a6e7f;
       background: #f8f3ee;
-      padding: 8px 16px;
-      border-radius: 30px;
-      cursor: pointer;
+      padding: 8px 14px;
+      border-radius: 25px;
       text-align: center;
-      min-width: 130px;
-      letter-spacing: 0.3px;
+      min-width: 120px;
     }
     .today-badge {
       background: #f7d4e0;
       border: none;
-      border-radius: 30px;
-      padding: 10px 16px;
-      font-size: 0.9rem;
-      font-weight: 600;
+      border-radius: 25px;
+      padding: 8px 14px;
+      font-size: 0.85rem;
+      font-weight: 700;
       color: #c47a95;
       cursor: pointer;
-      transition: 0.2s;
       white-space: nowrap;
     }
     .today-badge:active {
       background: #f0c2d2;
     }
 
-    /* 卡片通用 */
-    .card {
-      background: #ffffff;
-      border-radius: 28px;
-      padding: 18px 18px 16px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.04);
-      transition: all 0.2s;
+    /* Tab导航 */
+    .tab-nav {
+      display: flex;
+      background: #fff;
+      border-radius: 20px;
+      padding: 4px;
+      margin-bottom: 14px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+      gap: 2px;
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 10px 4px;
+      border: none;
+      background: transparent;
+      border-radius: 16px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #aaa;
+      cursor: pointer;
+      transition: all 0.25s;
+      white-space: nowrap;
+    }
+    .tab-btn.active {
+      background: #7eb8da;
+      color: #fff;
+      box-shadow: 0 3px 10px rgba(126,184,218,0.3);
     }
 
+    /* 卡片 */
+    .card {
+      background: #fff;
+      border-radius: 22px;
+      padding: 18px 16px;
+      margin-bottom: 14px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.04);
+    }
     .card-header {
       display: flex;
       align-items: center;
@@ -123,45 +134,43 @@
       margin-bottom: 14px;
     }
     .card-title {
-      font-size: 1.25rem;
+      font-size: 1.2rem;
       font-weight: 700;
       display: flex;
       align-items: center;
       gap: 8px;
     }
-    .schedule-card .card-title { color: #7eb8da; }
-    .milk-card .card-title { color: #c47a95; }
-    .poop-card .card-title { color: #8aa87d; }
-
-    .toggle-btn {
-      background: none;
-      border: 1px solid #dde9f3;
-      border-radius: 20px;
-      padding: 4px 14px;
-      font-size: 0.8rem;
+    .schedule-color {
       color: #7eb8da;
-      cursor: pointer;
-      background: #f6fafe;
+    }
+    .milk-color {
+      color: #c47a95;
+    }
+    .poop-color {
+      color: #8aa87d;
+    }
+    .food-color {
+      color: #e8a850;
     }
 
-    /* 日程列表 */
+    /* 日程 */
     .schedule-list {
       list-style: none;
       overflow: hidden;
-      transition: max-height 0.35s ease;
+      transition: max-height 0.35s;
     }
     .schedule-list.collapsed {
       max-height: 0;
     }
     .schedule-list.expanded {
-      max-height: 700px;
+      max-height: 900px;
     }
     .schedule-list li {
       display: flex;
       gap: 10px;
-      padding: 9px 0;
+      padding: 8px 0;
       border-bottom: 1px solid #f6ede5;
-      font-size: 0.92rem;
+      font-size: 0.9rem;
       align-items: baseline;
     }
     .schedule-list li:last-child {
@@ -171,65 +180,80 @@
       background: #e6f2fa;
       color: #437a9c;
       font-weight: 700;
-      padding: 2px 8px;
+      padding: 3px 10px;
       border-radius: 14px;
       font-size: 0.8rem;
-      min-width: 62px;
+      min-width: 60px;
       text-align: center;
       white-space: nowrap;
+    }
+    .toggle-btn {
+      background: #f0f7fc;
+      border: 1px solid #d4ecf7;
+      border-radius: 18px;
+      padding: 5px 14px;
+      font-size: 0.8rem;
+      color: #7eb8da;
+      cursor: pointer;
     }
 
     /* 输入行 */
     .input-row {
       display: flex;
       flex-wrap: wrap;
-      gap: 10px;
-      margin-bottom: 14px;
+      gap: 8px;
+      margin-bottom: 12px;
     }
-    .input-row input {
+    .input-row input,
+    .input-row select {
       flex: 1 1 0;
-      min-width: 80px;
-      padding: 14px 12px;
+      min-width: 70px;
+      padding: 12px 10px;
       border: 2px solid #ede3d8;
-      border-radius: 20px;
-      font-size: 1rem;
+      border-radius: 16px;
+      font-size: 0.95rem;
       background: #fefaf6;
       color: #4a4a4a;
       outline: none;
-      transition: border 0.2s;
     }
     .input-row input:focus {
       border-color: #7eb8da;
     }
     .record-btn {
-      background: #f7d4e0;
       border: none;
-      border-radius: 20px;
-      padding: 14px 20px;
+      border-radius: 16px;
+      padding: 12px 16px;
       font-weight: 700;
-      font-size: 1rem;
-      color: #c47a95;
+      font-size: 0.95rem;
       cursor: pointer;
       white-space: nowrap;
-      background: #fbe0e8;
       transition: 0.2s;
     }
-    .poop-card .record-btn {
+    .milk-btn {
+      background: #fbe0e8;
+      color: #c47a95;
+    }
+    .poop-btn {
       background: #dde8cc;
       color: #6c7c4e;
+    }
+    .food-btn {
+      background: #fcead8;
+      color: #c47a3a;
     }
     .record-btn:active {
       opacity: 0.7;
     }
 
+    /* 摘要 */
     .summary-row {
       background: #fdf6f0;
-      border-radius: 18px;
+      border-radius: 16px;
       padding: 12px 16px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin: 10px 0 12px;
+      margin: 8px 0 12px;
     }
     .summary-label {
       color: #8b8b8b;
@@ -237,44 +261,53 @@
     }
     .summary-value {
       font-weight: 700;
-      font-size: 1.3rem;
+      font-size: 1.2rem;
     }
-    .milk-card .summary-value { color: #c47a95; }
-    .poop-card .summary-value { color: #6c7c4e; }
+    .milk-color-text {
+      color: #c47a95;
+    }
+    .poop-color-text {
+      color: #6c7c4e;
+    }
+    .food-color-text {
+      color: #c47a3a;
+    }
 
+    /* 记录列表 */
     .record-list {
       list-style: none;
-      margin-top: 6px;
+      margin-top: 4px;
     }
     .record-item {
       display: flex;
       align-items: center;
       padding: 10px 4px;
       border-bottom: 1px solid #f5ede5;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
+      gap: 6px;
+      flex-wrap: wrap;
     }
     .record-time {
       font-weight: 700;
-      min-width: 60px;
+      min-width: 52px;
       color: #5f5f5f;
     }
     .record-detail {
       flex: 1;
-      margin-left: 8px;
+      margin-left: 4px;
     }
     .record-amount {
       font-weight: 700;
-      margin-left: 6px;
       color: #c47a95;
+      margin-left: 4px;
     }
     .delete-btn {
       background: none;
       border: none;
-      font-size: 1.4rem;
+      font-size: 1.3rem;
       color: #ccc;
       cursor: pointer;
-      padding: 4px 10px;
-      margin-left: 4px;
+      padding: 4px 8px;
       transition: 0.2s;
     }
     .delete-btn:active {
@@ -286,22 +319,135 @@
       padding: 14px;
       font-style: italic;
     }
-    .freq-box {
-      background: #f2f6ec;
-      border-radius: 16px;
-      padding: 12px;
-      font-size: 0.9rem;
-      color: #5d6b45;
-      margin: 10px 0 6px;
-      text-align: center;
+
+    /* 柱状图 */
+    .chart-container {
+      margin: 12px 0;
+    }
+    .chart-bar-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 6px;
+      font-size: 0.78rem;
+    }
+    .chart-label {
+      width: 48px;
+      text-align: right;
+      color: #888;
+    }
+    .chart-bar-bg {
+      flex: 1;
+      height: 22px;
+      background: #f0ebe3;
+      border-radius: 11px;
+      overflow: hidden;
+      position: relative;
+    }
+    .chart-bar-fill {
+      height: 100%;
+      border-radius: 11px;
+      transition: width 0.4s;
+    }
+    .chart-bar-fill.green {
+      background: #8cc97a;
+    }
+    .chart-bar-fill.red {
+      background: #e8847a;
+    }
+    .chart-value {
+      width: 42px;
+      font-weight: 600;
+      font-size: 0.78rem;
+    }
+    .chart-target-line {
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: rgba(0,0,0,0.15);
+      z-index: 1;
+    }
+
+    /* 7天平均 */
+    .avg-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #fdf6f0;
+      border-radius: 14px;
+      padding: 10px 14px;
+      margin: 8px 0;
+      font-size: 0.85rem;
+    }
+    .avg-change {
+      font-weight: 700;
+    }
+    .avg-change.positive {
+      color: #8cc97a;
+    }
+    .avg-change.negative {
+      color: #e8847a;
+    }
+
+    /* 正常/不正常标记 */
+    .status-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      margin-left: 6px;
+    }
+    .status-badge.normal {
+      background: #d4edc8;
+      color: #4a7a3a;
+    }
+    .status-badge.abnormal {
+      background: #fdd;
+      color: #b33;
+    }
+
+    /* 已吃食物标签 */
+    .food-cloud {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 10px 0;
+    }
+    .food-tag {
+      background: #fef3e4;
+      color: #c47a3a;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    /* 辅食日志 */
+    .food-log-item {
+      padding: 10px 0;
+      border-bottom: 1px solid #f5ede5;
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+    .food-log-date {
+      font-weight: 700;
+      color: #c47a3a;
+    }
+
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
     }
   </style>
 </head>
 <body>
-<div class="container">
-  <div class="app-title">
-    <span>👶 宝宝日常追踪</span>
-  </div>
+<div class="app-container">
+  <div class="app-title">👶 宝宝日常追踪</div>
 
   <!-- 日期导航 -->
   <div class="date-nav">
@@ -311,333 +457,361 @@
     <button class="today-badge" id="todayBtn">📅 今天</button>
   </div>
 
-  <!-- 固定日程卡片 -->
-  <div class="card schedule-card">
-    <div class="card-header">
-      <div class="card-title"><span>📋</span> 每日固定日程</div>
-      <button class="toggle-btn" id="toggleScheduleBtn">收起</button>
-    </div>
-    <ul class="schedule-list expanded" id="scheduleList">
-      <li><span class="time-badge">7:00</span> 起床，换尿片，吃奶（可加燕麦/水果）</li>
-      <li><span class="time-badge">8:00</span> 放在游戏垫上伸展</li>
-      <li><span class="time-badge">8:30</span> 洗脸/换衣/擦乳液</li>
-      <li><span class="time-badge">9:00</span> 回笼觉（30-45分钟）</li>
-      <li><span class="time-badge">10:00</span> 游戏垫运动/户外</li>
-      <li><span class="time-badge">11:00</span> 吃奶/辅食/换尿片/准备午睡</li>
-      <li><span class="time-badge">12:00</span> 睡长觉</li>
-      <li><span class="time-badge">14:15</span> 起床</li>
-      <li><span class="time-badge">14:30</span> 吃奶</li>
-      <li><span class="time-badge">15:30</span> 运动/出门</li>
-      <li><span class="time-badge">17:00</span> 辅食+少量水+黄昏觉</li>
-      <li><span class="time-badge">18:00</span> 洗澡/游泳/按摩</li>
-      <li><span class="time-badge">19:40</span> 吃奶/换尿片</li>
-      <li><span class="time-badge">20:00</span> 调暗灯光，睡前流程，睡觉</li>
-      <li><span class="time-badge">🌙夜晚</span> 迷糊奶 3-4oz</li>
-    </ul>
+  <!-- Tab切换 -->
+  <div class="tab-nav">
+    <button class="tab-btn active" data-tab="schedule">📋 日程</button>
+    <button class="tab-btn" data-tab="milk">🍼 喂奶</button>
+    <button class="tab-btn" data-tab="poop">💩 粑粑</button>
+    <button class="tab-btn" data-tab="food">🥄 辅食</button>
   </div>
 
-  <!-- 喂奶记录卡片 -->
-  <div class="card milk-card">
-    <div class="card-header">
-      <div class="card-title"><span>🍼</span> 喂奶记录</div>
+  <!-- ========== Tab: 日程 ========== -->
+  <div class="tab-content active" id="tab-schedule">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title schedule-color">📋 每日固定日程</div>
+        <button class="toggle-btn" id="toggleScheduleBtn">收起</button>
+      </div>
+      <ul class="schedule-list expanded" id="scheduleList">
+        <li><span class="time-badge">7:00</span> 起床，换尿片，吃奶（可加燕麦/水果）</li>
+        <li><span class="time-badge">8:00</span> 放在游戏垫上伸展</li>
+        <li><span class="time-badge">8:30</span> 洗脸/换衣/擦乳液</li>
+        <li><span class="time-badge">9:00</span> 回笼觉（30-45分钟）</li>
+        <li><span class="time-badge">10:00</span> 游戏垫运动/户外</li>
+        <li><span class="time-badge">11:00</span> 吃奶/辅食/换尿片/准备午睡</li>
+        <li><span class="time-badge">12:00</span> 睡长觉</li>
+        <li><span class="time-badge">14:15</span> 起床</li>
+        <li><span class="time-badge">14:30</span> 吃奶</li>
+        <li><span class="time-badge">15:30</span> 运动/出门</li>
+        <li><span class="time-badge">17:00</span> 辅食+少量水+黄昏觉</li>
+        <li><span class="time-badge">18:00</span> 洗澡/游泳/按摩</li>
+        <li><span class="time-badge">19:40</span> 吃奶/换尿片</li>
+        <li><span class="time-badge">20:00</span> 调暗灯光，睡前流程，睡觉</li>
+        <li><span class="time-badge">🌙夜晚</span> 迷糊奶 3-4oz</li>
+      </ul>
     </div>
-    <div class="input-row">
-      <input type="time" id="milkTimeInput" title="时间">
-      <input type="number" id="milkAmountInput" placeholder="奶量(ml)" min="1" step="5" inputmode="numeric">
-      <button class="record-btn" id="addMilkBtn">➕ 记录</button>
-    </div>
-    <div class="summary-row">
-      <span class="summary-label">今日总奶量</span>
-      <span class="summary-value" id="milkTotalDisplay">0 ml</span>
-    </div>
-    <ul class="record-list" id="milkRecordList"></ul>
   </div>
 
-  <!-- 粑粑记录卡片 -->
-  <div class="card poop-card">
-    <div class="card-header">
-      <div class="card-title"><span>💩</span> 粑粑记录</div>
+  <!-- ========== Tab: 喂奶 ========== -->
+  <div class="tab-content" id="tab-milk">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title milk-color">🍼 喂奶记录</div>
+      </div>
+      <div class="input-row">
+        <input type="time" id="milkTimeInput">
+        <input type="number" id="milkAmountInput" placeholder="奶量(ml)" min="1" step="5" inputmode="numeric">
+        <button class="record-btn milk-btn" id="addMilkBtn">➕ 记录</button>
+      </div>
+      <div class="summary-row">
+        <span class="summary-label">今日总奶量</span>
+        <span class="summary-value milk-color-text" id="milkTotalDisplay">0 ml</span>
+      </div>
+      <!-- Rolling 7-day average -->
+      <div class="avg-row" id="milkAvgRow">
+        <span>📊 近7天日均</span>
+        <span id="milk7DayAvg">-- ml</span>
+        <span class="avg-change" id="milkAvgChange">--</span>
+      </div>
+      <!-- 近7天柱状图 -->
+      <div class="chart-container" id="milkChart"></div>
+      <ul class="record-list" id="milkRecordList"></ul>
     </div>
-    <div class="input-row">
-      <input type="time" id="poopTimeInput" title="时间">
-      <input type="text" id="poopDescInput" placeholder="性状描述 (如金黄色糊状)">
-      <button class="record-btn" id="addPoopBtn">➕ 记录</button>
+  </div>
+
+  <!-- ========== Tab: 粑粑 ========== -->
+  <div class="tab-content" id="tab-poop">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title poop-color">💩 粑粑记录</div>
+      </div>
+      <div class="input-row">
+        <input type="time" id="poopTimeInput">
+        <select id="poopStatusSelect" style="flex:0.8;">
+          <option value="normal">✅ 正常</option>
+          <option value="abnormal">⚠️ 不正常</option>
+        </select>
+      </div>
+      <div class="input-row" id="poopAbnormalRow" style="display:none;">
+        <input type="text" id="poopDescInput" placeholder="请描述异常细节...">
+      </div>
+      <button class="record-btn poop-btn" id="addPoopBtn" style="width:100%;">➕ 记录粑粑</button>
+      <div class="summary-row">
+        <span class="summary-label">今日次数</span>
+        <span class="summary-value poop-color-text" id="poopCountDisplay">0 次</span>
+      </div>
+      <ul class="record-list" id="poopRecordList"></ul>
     </div>
-    <div class="summary-row">
-      <span class="summary-label">今日次数</span>
-      <span class="summary-value" id="poopCountDisplay">0 次</span>
+  </div>
+
+  <!-- ========== Tab: 辅食 ========== -->
+  <div class="tab-content" id="tab-food">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title food-color">🥄 辅食记录</div>
+      </div>
+      <div class="input-row">
+        <input type="text" id="foodItemInput" placeholder="食物名称（如：胡萝卜泥）">
+        <input type="text" id="foodNoteInput" placeholder="备注（可选）">
+      </div>
+      <button class="record-btn food-btn" id="addFoodBtn" style="width:100%;">➕ 记录辅食</button>
+      <div style="margin-top:14px;">
+        <strong>🍽️ 已解锁食物：</strong>
+        <div class="food-cloud" id="foodCloud"></div>
+      </div>
+      <ul class="record-list" id="foodRecordList"></ul>
     </div>
-    <div class="freq-box" id="poopFrequencyBox">暂无历史数据</div>
-    <ul class="record-list" id="poopRecordList"></ul>
+    <!-- 历史辅食日志（固定展示） -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title food-color">📖 辅食历史日志</div>
+      </div>
+      <div id="foodHistoryLog" style="font-size:0.85rem;max-height:400px;overflow-y:auto;"></div>
+    </div>
   </div>
 </div>
 
 <script>
-  (function() {
-    // 存储键
-    const MILK_STORAGE = 'baby_milk_records';
-    const POOP_STORAGE = 'baby_poop_records';
+(function() {
+  // 存储key
+  const MILK_KEY = 'baby_milk_v2';
+  const POOP_KEY = 'baby_poop_v2';
+  const FOOD_KEY = 'baby_food_v2';
 
-    // 当前选中日期
-    let currentDate = new Date();
+  let currentDate = new Date();
+  const DAILY_TARGET = 800; // 每日奶量目标
 
-    // 工具函数：格式化日期 YYYY-MM-DD
-    function formatDateStr(date) {
-      const y = date.getFullYear();
-      const m = String(date.getMonth() + 1).padStart(2, '0');
-      const d = String(date.getDate()).padStart(2, '0');
-      return `${y}-${m}-${d}`;
+  // 辅食历史数据（固定）
+  const FOOD_HISTORY = [
+    { day:1, date:'3.22', age:'5个月16天', food:'Gerber燕麦糊（很稀，1:6）', amount:'1勺半', note:'平静吃完，无不良反应' },
+    { day:2, date:'3.23', age:'5个月17天', food:'Gerber燕麦糊（较稠，1:4）', amount:'3小勺', note:'略有兴趣，第一口皱眉，无不良反应，粑粑绿色比较稀，能渗进尿布' },
+    { day:3, date:'3.24', age:'5个月18天', food:'Gerber燕麦糊（较稠，1:4）', amount:'6小勺', note:'很有兴趣，BLW自己拿勺子吃了4小口，无不良反应，粑粑稀，绿色稀便，能渗进尿布' },
+    { day:4, date:'3.25', age:'5个月19天', food:'Gerber燕麦糊', amount:'', note:'绿色稀粑粑' },
+    { day:5, date:'3.26', age:'5个月20天', food:'Gerber燕麦糊', amount:'', note:'无症状' },
+    { day:6, date:'3.27', age:'5个月21天', food:'胡萝卜泥', amount:'', note:'没过敏，吃完拉了三次粑粑，都很稀，渗进尿布湿' },
+    { day:7, date:'3.28', age:'5个月22天', food:'Gerber燕麦糊', amount:'', note:'拉了黄色粑粑，较稀，但比前几天好' },
+    { day:8, date:'3.29', age:'5个月23天', food:'Gerber燕麦糊', amount:'', note:'吃的开心，没有不良反应，没有拉粑粑' },
+    { day:9, date:'3.30', age:'5个月24天', food:'Gerber燕麦糊', amount:'两小勺（干的两小勺兑水）', note:'拉了粑粑，稀' },
+    { day:10, date:'3.30-4.1', age:'', food:'停辅食', amount:'', note:'粑粑稀，观察休养。4.1看医生，医生说没事，开始吃益生菌' },
+    { day:12, date:'4.2', age:'5个月27天', food:'Earth Best燕麦糊', amount:'两小勺', note:'吃的乖，拉了粑粑，绿色粘稠糊糊，有一点点水便分离，感觉在好转' },
+    { day:13, date:'4.3', age:'5个月28天', food:'胡萝卜小米糊糊', amount:'6小勺尖尖', note:'喜欢吃，没有拉粑粑' },
+    { day:14, date:'4.4', age:'', food:'胡萝卜糊糊', amount:'', note:'第三次吃，喜欢吃，没有拉粑粑' },
+    { day:15, date:'4.5', age:'', food:'胡萝卜糊糊', amount:'', note:'拉了黄绿色细腻粑粑，稍微还有一点水边分离，继续好转' },
+    { day:16, date:'4.6', age:'', food:'红薯泥', amount:'', note:'第一次吃，喜欢吃，没有不良反应' },
+    { day:17, date:'4.7', age:'', food:'红薯泥', amount:'', note:'第二次，喜欢，无不良反应' },
+    { day:18, date:'4.8', age:'', food:'红薯泥', amount:'', note:'第三次，无不良反应，拉了粑粑，糊糊状，黄绿色' },
+    { day:19, date:'4.9', age:'', food:'牛油果', amount:'', note:'第一次吃，喜欢吃，无不良反应' },
+    { day:20, date:'4.10', age:'', food:'牛油果+燕麦糊', amount:'', note:'第二次牛油果，第一次自己坐在椅子里吃，拉了粑粑糊糊状黄绿色，傍晚补燕麦糊' },
+    { day:21, date:'4.11', age:'', food:'牛油果', amount:'', note:'第三次，无不良反应' },
+    { day:22, date:'4.12', age:'', food:'燕麦糊', amount:'', note:'无不良反应' },
+    { day:23, date:'4.13', age:'', food:'牛肉', amount:'', note:'第一次吃，喜欢，无不良反应' },
+    { day:24, date:'4.14', age:'', food:'牛肉', amount:'', note:'第二次，早上粑粑糊糊状正常，中午打疫苗，晚上发烧，儿保医生说体重轻可增加一顿辅食' },
+    { day:25, date:'4.15', age:'', food:'燕麦糊', amount:'', note:'拉了细腻的粑粑，黄绿色' },
+    { day:26, date:'4.16', age:'', food:'牛油果+燕麦糊', amount:'', note:'上午牛油果+燕麦糊，下午燕麦糊' },
+    { day:27, date:'4.17', age:'', food:'牛肉+燕麦糊', amount:'', note:'下午吃了一顿' },
+    { day:28, date:'4.18', age:'', food:'蛋黄（1/5）+ 燕麦糊', amount:'', note:'第一次吃蛋黄，无不良反应，下午拉粑粑黄色臭，比之前干，后段较稀' },
+    { day:29, date:'4.19', age:'', food:'鸡蛋', amount:'', note:'第二次，无不良反应' },
+    { day:30, date:'4.20', age:'', food:'蛋黄糊糊 + 燕麦糊', amount:'', note:'上午第三次蛋黄，下午燕麦糊，拉了好粑粑，黄色粘稠细腻' },
+    { day:31, date:'4.21', age:'', food:'鸡肉 + 燕麦糊', amount:'', note:'上午第一次鸡肉无不良反应，下午燕麦糊，洗澡前拉了一点粑粑，黄稠臭' },
+  ];
+
+  // 工具函数
+  function formatDateStr(d) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth()+1).padStart(2,'0');
+    const day = String(d.getDate()).padStart(2,'0');
+    return `${y}-${m}-${day}`;
+  }
+  function getDisplayDate(d) {
+    const wd = ['日','一','二','三','四','五','六'];
+    const m = d.getMonth()+1;
+    const day = d.getDate();
+    const w = wd[d.getDay()];
+    const isToday = formatDateStr(d) === formatDateStr(new Date());
+    return `${m}月${day}日 周${w}${isToday?' (今天)':''}`;
+  }
+  function getNowTime() {
+    const n = new Date();
+    return String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
+  }
+  function loadData(key) {
+    try { return JSON.parse(localStorage.getItem(key)) || {}; } catch { return {}; }
+  }
+  function saveData(key, data) { localStorage.setItem(key, JSON.stringify(data)); }
+  function getDayRecords(key, dateStr) {
+    const all = loadData(key);
+    return all[dateStr] || [];
+  }
+  function setDayRecords(key, dateStr, records) {
+    const all = loadData(key);
+    if (records.length===0) delete all[dateStr];
+    else all[dateStr] = records;
+    saveData(key, all);
+  }
+
+  // 获取近N天日期列表
+  function getLastNDates(n, endDate) {
+    const dates = [];
+    const d = new Date(endDate);
+    for (let i=n-1; i>=0; i--) {
+      const dd = new Date(d);
+      dd.setDate(dd.getDate()-i);
+      dates.push(formatDateStr(dd));
     }
+    return dates;
+  }
 
-    // 显示友好日期
-    function getDisplayDate(date) {
-      const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
-      const month = date.getMonth() + 1;
-      const day = date.getDate();
-      const weekday = weekdays[date.getDay()];
-      const todayStr = formatDateStr(new Date());
-      const isToday = formatDateStr(date) === todayStr;
-      return `${month}月${day}日 周${weekday}${isToday ? ' (今天)' : ''}`;
-    }
+  // ========== Tab切换 ==========
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      document.getElementById('tab-'+btn.dataset.tab).classList.add('active');
+    });
+  });
 
-    // 获取当前时间字符串 HH:MM
-    function getCurrentTimeString() {
-      const now = new Date();
-      return String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
-    }
-
-    // 本地存储操作
-    function loadData(key) {
-      try {
-        const stored = localStorage.getItem(key);
-        return stored ? JSON.parse(stored) : {};
-      } catch (e) {
-        return {};
-      }
-    }
-
-    function saveData(key, data) {
-      localStorage.setItem(key, JSON.stringify(data));
-    }
-
-    function getDayRecords(key, dateStr) {
-      const all = loadData(key);
-      return all[dateStr] || [];
-    }
-
-    function setDayRecords(key, dateStr, records) {
-      const all = loadData(key);
-      if (records.length === 0) {
-        delete all[dateStr];
-      } else {
-        all[dateStr] = records;
-      }
-      saveData(key, all);
-    }
-
-    // ---------- 渲染喂奶模块 ----------
-    function renderMilk() {
-      const dateStr = formatDateStr(currentDate);
-      const records = getDayRecords(MILK_STORAGE, dateStr);
-      const listEl = document.getElementById('milkRecordList');
-      const totalEl = document.getElementById('milkTotalDisplay');
-
-      if (!records.length) {
-        listEl.innerHTML = '<li class="empty-msg">今天还没有喂奶记录</li>';
-      } else {
-        const sorted = [...records].sort((a, b) => (a.time || '').localeCompare(b.time || ''));
-        listEl.innerHTML = sorted.map((rec, idx) => {
-          const originalIndex = records.indexOf(rec);
-          return `
-            <li class="record-item">
-              <span class="record-time">${rec.time || '--:--'}</span>
-              <span class="record-detail"></span>
-              <span class="record-amount">${rec.amount || 0} ml</span>
-              <button class="delete-btn" data-type="milk" data-index="${originalIndex}">✕</button>
-            </li>
-          `;
-        }).join('');
-      }
-
-      const total = records.reduce((sum, r) => sum + (Number(r.amount) || 0), 0);
-      totalEl.textContent = `${total} ml`;
-    }
-
-    // ---------- 渲染粑粑模块 ----------
-    function renderPoop() {
-      const dateStr = formatDateStr(currentDate);
-      const records = getDayRecords(POOP_STORAGE, dateStr);
-      const listEl = document.getElementById('poopRecordList');
-      const countEl = document.getElementById('poopCountDisplay');
-      const freqEl = document.getElementById('poopFrequencyBox');
-
-      if (!records.length) {
-        listEl.innerHTML = '<li class="empty-msg">今天还没有粑粑记录</li>';
-      } else {
-        const sorted = [...records].sort((a, b) => (a.time || '').localeCompare(b.time || ''));
-        listEl.innerHTML = sorted.map((rec, idx) => {
-          const originalIndex = records.indexOf(rec);
-          return `
-            <li class="record-item">
-              <span class="record-time">${rec.time || '--:--'}</span>
-              <span class="record-detail">${rec.desc || '未描述'}</span>
-              <button class="delete-btn" data-type="poop" data-index="${originalIndex}">✕</button>
-            </li>
-          `;
-        }).join('');
-      }
-
-      countEl.textContent = `${records.length} 次`;
-
-      // 计算平均排便频率（基于所有有记录的天数）
-      const allPoopData = loadData(POOP_STORAGE);
-      const datesWithPoop = Object.keys(allPoopData).filter(date => {
-        const arr = allPoopData[date];
-        return Array.isArray(arr) && arr.length > 0;
-      }).sort();
-
-      if (datesWithPoop.length === 0) {
-        freqEl.textContent = '暂无历史数据';
-      } else if (datesWithPoop.length === 1) {
-        freqEl.textContent = '记录天数不足，暂无法计算平均频率';
-      } else {
-        const firstDate = new Date(datesWithPoop[0]);
-        const lastDate = new Date(datesWithPoop[datesWithPoop.length - 1]);
-        const daySpan = Math.round((lastDate - firstDate) / (1000 * 60 * 60 * 24)) + 1;
-        const totalDaysWithPoop = datesWithPoop.length;
-        const avgDays = (daySpan / totalDaysWithPoop).toFixed(1);
-        freqEl.textContent = `📊 平均排便频率：约每 ${avgDays} 天一次 (共${totalDaysWithPoop}天有记录，跨${daySpan}天)`;
-      }
-    }
-
-    // ---------- 全局渲染 ----------
-    function renderAll() {
-      document.getElementById('dateDisplay').textContent = getDisplayDate(currentDate);
-
-      const isToday = formatDateStr(currentDate) === formatDateStr(new Date());
-      const milkTimeInput = document.getElementById('milkTimeInput');
-      const poopTimeInput = document.getElementById('poopTimeInput');
-
-      if (isToday) {
-        const nowTime = getCurrentTimeString();
-        milkTimeInput.value = nowTime;
-        poopTimeInput.value = nowTime;
-      } else {
-        milkTimeInput.value = '12:00';
-        poopTimeInput.value = '12:00';
-      }
-
-      renderMilk();
-      renderPoop();
-    }
-
-    // ---------- 添加记录 ----------
-    function addMilkRecord() {
-      const timeInput = document.getElementById('milkTimeInput');
-      const amountInput = document.getElementById('milkAmountInput');
-      const time = timeInput.value;
-      const amount = parseInt(amountInput.value, 10);
-
-      if (!time) {
-        alert('请选择时间');
-        return;
-      }
-      if (isNaN(amount) || amount <= 0) {
-        alert('请输入有效的奶量（大于0）');
-        return;
-      }
-
-      const dateStr = formatDateStr(currentDate);
-      const records = getDayRecords(MILK_STORAGE, dateStr);
-      records.push({ time: time, amount: amount });
-      setDayRecords(MILK_STORAGE, dateStr, records);
-      amountInput.value = '';
-      renderMilk();
-    }
-
-    function addPoopRecord() {
-      const timeInput = document.getElementById('poopTimeInput');
-      const descInput = document.getElementById('poopDescInput');
-      const time = timeInput.value;
-      const desc = descInput.value.trim();
-
-      if (!time) {
-        alert('请选择时间');
-        return;
-      }
-
-      const dateStr = formatDateStr(currentDate);
-      const records = getDayRecords(POOP_STORAGE, dateStr);
-      records.push({ time: time, desc: desc || '未描述' });
-      setDayRecords(POOP_STORAGE, dateStr, records);
-      descInput.value = '';
-      renderPoop();
-    }
-
-    // ---------- 删除记录 ----------
-    function handleDeleteClick(e) {
-      const deleteBtn = e.target.closest('.delete-btn');
-      if (!deleteBtn) return;
-
-      const type = deleteBtn.dataset.type;
-      const index = parseInt(deleteBtn.dataset.index, 10);
-      if (isNaN(index)) return;
-
-      const dateStr = formatDateStr(currentDate);
-      const storageKey = type === 'milk' ? MILK_STORAGE : POOP_STORAGE;
-      const records = getDayRecords(storageKey, dateStr);
-      
-      if (index >= 0 && index < records.length) {
-        records.splice(index, 1);
-        setDayRecords(storageKey, dateStr, records);
-        if (type === 'milk') {
-          renderMilk();
-        } else {
-          renderPoop();
-        }
-      }
-    }
-
-    // ---------- 日期切换 ----------
-    function changeDate(days) {
-      currentDate.setDate(currentDate.getDate() + days);
-      renderAll();
-    }
-
-    function goToToday() {
-      currentDate = new Date();
-      renderAll();
-    }
-
-    // ---------- 日程折叠 ----------
-    function toggleSchedule() {
-      const list = document.getElementById('scheduleList');
-      const btn = document.getElementById('toggleScheduleBtn');
-      if (list.classList.contains('expanded')) {
-        list.classList.remove('expanded');
-        list.classList.add('collapsed');
-        btn.textContent = '展开';
-      } else {
-        list.classList.remove('collapsed');
-        list.classList.add('expanded');
-        btn.textContent = '收起';
-      }
-    }
-
-    // ---------- 事件绑定 ----------
-    document.getElementById('prevDayBtn').addEventListener('click', () => changeDate(-1));
-    document.getElementById('nextDayBtn').addEventListener('click', () => changeDate(1));
-    document.getElementById('todayBtn').addEventListener('click', goToToday);
-    document.getElementById('toggleScheduleBtn').addEventListener('click', toggleSchedule);
-    document.getElementById('addMilkBtn').addEventListener('click', addMilkRecord);
-    document.getElementById('addPoopBtn').addEventListener('click', addPoopRecord);
-
-    // 全局删除监听
-    document.body.addEventListener('click', handleDeleteClick);
-
-    // 初始渲染
+  // ========== 日期导航 ==========
+  document.getElementById('prevDayBtn').addEventListener('click', ()=>{
+    currentDate.setDate(currentDate.getDate()-1);
     renderAll();
-  })();
-</script>
-</body>
-</html>
+  });
+  document.getElementById('nextDayBtn').addEventListener('click', ()=>{
+    currentDate.setDate(currentDate.getDate()+1);
+    renderAll();
+  });
+  document.getElementById('todayBtn').addEventListener('click', ()=>{
+    currentDate = new Date();
+    renderAll();
+  });
+
+  // 日程折叠
+  document.getElementById('toggleScheduleBtn').addEventListener('click', ()=>{
+    const list = document.getElementById('scheduleList');
+    const btn = document.getElementById('toggleScheduleBtn');
+    if(list.classList.contains('expanded')) {
+      list.classList.remove('expanded'); list.classList.add('collapsed'); btn.textContent='展开';
+    } else {
+      list.classList.remove('collapsed'); list.classList.add('expanded'); btn.textContent='收起';
+    }
+  });
+
+  // ========== 喂奶渲染 ==========
+  function renderMilk() {
+    const dateStr = formatDateStr(currentDate);
+    const records = getDayRecords(MILK_KEY, dateStr);
+    const listEl = document.getElementById('milkRecordList');
+    const totalEl = document.getElementById('milkTotalDisplay');
+
+    if(records.length===0) {
+      listEl.innerHTML = '<li class="empty-msg">今天还没有喂奶记录</li>';
+    } else {
+      const sorted = [...records].sort((a,b)=>a.time.localeCompare(b.time));
+      listEl.innerHTML = sorted.map((r,i)=>{
+        const origIdx = records.indexOf(r);
+        return `<li class="record-item">
+          <span class="record-time">${r.time}</span>
+          <span class="record-detail"></span>
+          <span class="record-amount">${r.amount} ml</span>
+          <button class="delete-btn" data-type="milk" data-index="${origIdx}">✕</button>
+        </li>`;
+      }).join('');
+    }
+    const total = records.reduce((s,r)=>s+(Number(r.amount)||0),0);
+    totalEl.textContent = `${total} ml`;
+
+    // 近7天柱状图 & rolling average
+    renderMilkChart(dateStr, total);
+    renderMilkAvg(dateStr);
+  }
+
+  function renderMilkChart(currentDateStr, todayTotal) {
+    const chartEl = document.getElementById('milkChart');
+    const last7 = getLastNDates(7, currentDate);
+    let html = '<div style="font-weight:600;margin-bottom:6px;">📊 近7天奶量 (目标800ml)</div>';
+    last7.forEach(ds => {
+      const recs = getDayRecords(MILK_KEY, ds);
+      const sum = recs.reduce((s,r)=>s+(Number(r.amount)||0),0);
+      const pct = Math.min(100, (sum/DAILY_TARGET)*100);
+      const colorClass = sum >= DAILY_TARGET ? 'green' : 'red';
+      const d = new Date(ds);
+      const label = `${d.getMonth()+1}/${d.getDate()}`;
+      const isToday = ds === currentDateStr;
+      html += `<div class="chart-bar-row">
+        <span class="chart-label">${label}${isToday?'⭐':''}</span>
+        <div class="chart-bar-bg">
+          <div class="chart-bar-fill ${colorClass}" style="width:${pct}%;"></div>
+          <div class="chart-target-line" style="left:${(DAILY_TARGET/1000)*100}%;"></div>
+        </div>
+        <span class="chart-value" style="color:${sum>=DAILY_TARGET?'#4a7a3a':'#b33'}">${sum}ml</span>
+      </div>`;
+    });
+    html += '<div style="font-size:0.7rem;color:#999;text-align:right;">虚线=800ml目标</div>';
+    chartEl.innerHTML = html;
+  }
+
+  function renderMilkAvg(currentDateStr) {
+    const last7 = getLastNDates(7, currentDate);
+    const prev7 = getLastNDates(14, currentDate).slice(0,7);
+    const calcAvg = (dates) => {
+      let total=0, count=0;
+      dates.forEach(ds=>{
+        const recs = getDayRecords(MILK_KEY, ds);
+        const sum = recs.reduce((s,r)=>s+(Number(r.amount)||0),0);
+        total+=sum; count++;
+      });
+      return count>0 ? Math.round(total/count) : 0;
+    };
+    const thisWeek = calcAvg(last7);
+    const prevWeek = calcAvg(prev7);
+    document.getElementById('milk7DayAvg').textContent = `${thisWeek} ml`;
+    const changeEl = document.getElementById('milkAvgChange');
+    if(prevWeek===0) {
+      changeEl.textContent = '';
+      changeEl.className = 'avg-change';
+    } else {
+      const diff = thisWeek - prevWeek;
+      const sign = diff>=0 ? '+' : '';
+      changeEl.textContent = `${sign}${diff} ml vs上周`;
+      changeEl.className = 'avg-change ' + (diff>=0 ? 'positive' : 'negative');
+    }
+  }
+
+  // ========== 粑粑渲染 ==========
+  function renderPoop() {
+    const dateStr = formatDateStr(currentDate);
+    const records = getDayRecords(POOP_KEY, dateStr);
+    const listEl = document.getElementById('poopRecordList');
+    const countEl = document.getElementById('poopCountDisplay');
+
+    if(records.length===0) {
+      listEl.innerHTML = '<li class="empty-msg">今天还没有粑粑记录</li>';
+    } else {
+      const sorted = [...records].sort((a,b)=>a.time.localeCompare(b.time));
+      listEl.innerHTML = sorted.map((r,i)=>{
+        const origIdx = records.indexOf(r);
+        const statusClass = r.status==='normal' ? 'normal' : 'abnormal';
+        const statusText = r.status==='normal' ? '✅正常' : '⚠️不正常';
+        const noteText = r.note ? ` - ${r.note}` : '';
+        return `<li class="record-item">
+          <span class="record-time">${r.time}</span>
+          <span class="record-detail">
+            <span class="status-badge ${statusClass}">${statusText}</span>${noteText}
+          </span>
+          <button class="delete-btn" data-type="poop" data-index="${origIdx}">✕</button>
+        </li>`;
+      }).join('');
+    }
+    countEl.textContent = `${records.length} 次`;
+  }
+
+  // ========== 辅食渲染 ==========
+  function renderFood() {
+    const dateStr = formatDateStr(currentDate);
+    const records = getDayRecords(FOOD_KEY, dateStr);
+    const listEl = document.getElementById('foodRecordList');
+    const cloudEl = document.getElementById('foodCloud');
+
+    if(records.length===0) {
+      listEl.innerHTML = '<li class="empty-msg">今天还没有辅食记录</li>';
+   
