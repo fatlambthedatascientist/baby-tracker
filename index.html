@@ -607,12 +607,32 @@
 (function() {
   // ============ 常量 ============
   const BIRTH_DATE = new Date(2025, 9, 7); // 2025年10月7日（月份从0开始）
-  const MILK_KEY = 'baby_milk_v3';
-  const POOP_KEY = 'baby_poop_v3';
-  const FOOD_KEY = 'baby_food_v3';
+  const MILK_KEY = 'baby_milk_v4';
+  const POOP_KEY = 'baby_poop_v4';
+  const FOOD_KEY = 'baby_food_v4';
   const DAILY_TARGET = 800;
 
-  let currentDate = new Date();
+  // 使用本地日期字符串作为 currentDate，避免时区问题
+  function getLocalDateString() {
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = String(now.getMonth() + 1).padStart(2, '0');
+    const d = String(now.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
+
+  // currentDate 存储为日期字符串，避免时区偏移
+  let currentDateStr = getLocalDateString();
+
+  // 从日期字符串创建 Date 对象（使用本地时间）
+  function dateFromString(dateStr) {
+    const parts = dateStr.split('-');
+    return new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+  }
+
+  function getCurrentDateObj() {
+    return dateFromString(currentDateStr);
+  }
 
   // ============ 辅食固定历史数据 ============
   const FOOD_HISTORY = [
@@ -649,19 +669,14 @@
   ];
 
   // ============ 工具函数 ============
-  function formatDateStr(d) {
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    return `${y}-${m}-${day}`;
-  }
-
-  function getDisplayDate(d) {
+  function getDisplayDate(dateStr) {
+    const d = dateFromString(dateStr);
     const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
     const m = d.getMonth() + 1;
     const day = d.getDate();
     const w = weekdays[d.getDay()];
-    const isToday = formatDateStr(d) === formatDateStr(new Date());
+    const todayStr = getLocalDateString();
+    const isToday = dateStr === todayStr;
     return `${m}月${day}日 周${w}${isToday ? ' (今天)' : ''}`;
   }
 
@@ -671,16 +686,18 @@
   }
 
   // 计算宝宝年龄
-  function getBabyAge(birthDate, targetDate) {
+  function getBabyAge(birthDate, targetDateStr) {
+    const targetDate = dateFromString(targetDateStr);
     const diffMs = targetDate - birthDate;
     const totalDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    if (totalDays < 0) return { months: 0, days: 0, totalDays: 0 };
     const months = Math.floor(totalDays / 30.4375);
     const days = Math.floor(totalDays - months * 30.4375);
     return { months: months, days: days, totalDays: totalDays };
   }
 
   function getBabyAgeString() {
-    const age = getBabyAge(BIRTH_DATE, currentDate);
+    const age = getBabyAge(BIRTH_DATE, currentDateStr);
     if (age.totalDays < 0) return '尚未出生';
     if (age.months === 0) return `${age.days} 天`;
     return `${age.months} 个月 ${age.days} 天`;
@@ -715,13 +732,16 @@
     saveData(key, all);
   }
 
-  function getLastNDates(n, endDate) {
+  function getLastNDates(n, endDateStr) {
     const dates = [];
-    const d = new Date(endDate);
+    const endDate = dateFromString(endDateStr);
     for (let i = n - 1; i >= 0; i--) {
-      const dd = new Date(d);
+      const dd = new Date(endDate);
       dd.setDate(dd.getDate() - i);
-      dates.push(formatDateStr(dd));
+      const y = dd.getFullYear();
+      const m = String(dd.getMonth() + 1).padStart(2, '0');
+      const d = String(dd.getDate()).padStart(2, '0');
+      dates.push(`${y}-${m}-${d}`);
     }
     return dates;
   }
@@ -729,7 +749,6 @@
   // 计算排便频率（平均几天拉一次）
   function calculatePoopFrequency() {
     const allPoopData = loadData(POOP_KEY);
-    // 收集所有有粑粑记录的日期
     const datesWithPoop = Object.keys(allPoopData).filter(function(date) {
       const arr = allPoopData[date];
       return Array.isArray(arr) && arr.length > 0;
@@ -743,20 +762,14 @@
       return { text: '仅有1天记录，至少需要2天才能计算频率', avgDays: null };
     }
 
-    // 计算跨度和平均间隔
-    const firstDate = new Date(datesWithPoop[0]);
-    const lastDate = new Date(datesWithPoop[datesWithPoop.length - 1]);
+    const firstDate = dateFromString(datesWithPoop[0]);
+    const lastDate = dateFromString(datesWithPoop[datesWithPoop.length - 1]);
     const totalSpanDays = Math.round((lastDate - firstDate) / (1000 * 60 * 60 * 24)) + 1;
     
-    // 平均间隔：总跨度天数 / (有记录的天数 - 1) 更合理
-    // 或者：总跨度天数 / 有记录的天数
-    const avgDays1 = (totalSpanDays / datesWithPoop.length).toFixed(1);
-    
-    // 计算每次排便之间的实际间隔
     const intervals = [];
     for (let i = 1; i < datesWithPoop.length; i++) {
-      const d1 = new Date(datesWithPoop[i - 1]);
-      const d2 = new Date(datesWithPoop[i]);
+      const d1 = dateFromString(datesWithPoop[i - 1]);
+      const d2 = dateFromString(datesWithPoop[i]);
       const gap = Math.round((d2 - d1) / (1000 * 60 * 60 * 24));
       intervals.push(gap);
     }
@@ -780,15 +793,27 @@
 
   // ============ 日期导航 ============
   document.getElementById('prevDayBtn').addEventListener('click', function() {
-    currentDate.setDate(currentDate.getDate() - 1);
+    const d = dateFromString(currentDateStr);
+    d.setDate(d.getDate() - 1);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    currentDateStr = `${y}-${m}-${day}`;
     renderAll();
   });
+
   document.getElementById('nextDayBtn').addEventListener('click', function() {
-    currentDate.setDate(currentDate.getDate() + 1);
+    const d = dateFromString(currentDateStr);
+    d.setDate(d.getDate() + 1);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    currentDateStr = `${y}-${m}-${day}`;
     renderAll();
   });
+
   document.getElementById('todayBtn').addEventListener('click', function() {
-    currentDate = new Date();
+    currentDateStr = getLocalDateString();
     renderAll();
   });
 
@@ -819,8 +844,7 @@
 
   // ============ 喂奶渲染 ============
   function renderMilk() {
-    var dateStr = formatDateStr(currentDate);
-    var records = getDayRecords(MILK_KEY, dateStr);
+    var records = getDayRecords(MILK_KEY, currentDateStr);
     var listEl = document.getElementById('milkRecordList');
     var totalEl = document.getElementById('milkTotalDisplay');
 
@@ -842,13 +866,13 @@
     var total = records.reduce(function(s, r) { return s + (Number(r.amount) || 0); }, 0);
     totalEl.textContent = total + ' ml';
 
-    renderMilkChart(dateStr);
-    renderMilkAvg(dateStr);
+    renderMilkChart();
+    renderMilkAvg();
   }
 
-  function renderMilkChart(currentDateStr) {
+  function renderMilkChart() {
     var chartEl = document.getElementById('milkChart');
-    var last7 = getLastNDates(7, currentDate);
+    var last7 = getLastNDates(7, currentDateStr);
     var html = '<div style="font-weight:600;margin-bottom:8px;">📊 近7天奶量 (目标' + DAILY_TARGET + 'ml)</div>';
     
     last7.forEach(function(ds) {
@@ -856,7 +880,7 @@
       var sum = recs.reduce(function(s, r) { return s + (Number(r.amount) || 0); }, 0);
       var pct = Math.min(100, (sum / DAILY_TARGET) * 100);
       var colorClass = sum >= DAILY_TARGET ? 'green' : 'red';
-      var d = new Date(ds);
+      var d = dateFromString(ds);
       var label = (d.getMonth() + 1) + '/' + d.getDate();
       var isToday = ds === currentDateStr;
       
@@ -873,9 +897,9 @@
     chartEl.innerHTML = html;
   }
 
-  function renderMilkAvg(currentDateStr) {
-    var last7 = getLastNDates(7, currentDate);
-    var prev7 = getLastNDates(14, currentDate).slice(0, 7);
+  function renderMilkAvg() {
+    var last7 = getLastNDates(7, currentDateStr);
+    var prev7 = getLastNDates(14, currentDateStr).slice(0, 7);
     
     function calcAvg(dates) {
       var total = 0, count = 0;
@@ -912,18 +936,16 @@
     if (!time) { alert('请选择时间'); return; }
     if (isNaN(amount) || amount <= 0) { alert('请输入有效的奶量'); return; }
     
-    var dateStr = formatDateStr(currentDate);
-    var records = getDayRecords(MILK_KEY, dateStr);
+    var records = getDayRecords(MILK_KEY, currentDateStr);
     records.push({ time: time, amount: amount });
-    setDayRecords(MILK_KEY, dateStr, records);
+    setDayRecords(MILK_KEY, currentDateStr, records);
     document.getElementById('milkAmountInput').value = '';
     renderMilk();
   });
 
   // ============ 粑粑渲染 ============
   function renderPoop() {
-    var dateStr = formatDateStr(currentDate);
-    var records = getDayRecords(POOP_KEY, dateStr);
+    var records = getDayRecords(POOP_KEY, currentDateStr);
     var listEl = document.getElementById('poopRecordList');
     var countEl = document.getElementById('poopCountDisplay');
     var freqBox = document.getElementById('poopFreqBox');
@@ -948,7 +970,6 @@
     }
     countEl.textContent = records.length + ' 次';
 
-    // 排便频率统计
     var freqResult = calculatePoopFrequency();
     freqBox.textContent = freqResult.text;
   }
@@ -964,10 +985,9 @@
     }
     if (!time) { alert('请选择时间'); return; }
     
-    var dateStr = formatDateStr(currentDate);
-    var records = getDayRecords(POOP_KEY, dateStr);
+    var records = getDayRecords(POOP_KEY, currentDateStr);
     records.push({ time: time, status: status, note: note });
-    setDayRecords(POOP_KEY, dateStr, records);
+    setDayRecords(POOP_KEY, currentDateStr, records);
     document.getElementById('poopDescInput').value = '';
     document.getElementById('poopStatusSelect').value = 'normal';
     document.getElementById('poopAbnormalRow').style.display = 'none';
@@ -976,8 +996,7 @@
 
   // ============ 辅食渲染 ============
   function renderFood() {
-    var dateStr = formatDateStr(currentDate);
-    var records = getDayRecords(FOOD_KEY, dateStr);
+    var records = getDayRecords(FOOD_KEY, currentDateStr);
     var listEl = document.getElementById('foodRecordList');
     var cloudEl = document.getElementById('foodCloud');
 
@@ -995,7 +1014,6 @@
       }).join('');
     }
 
-    // 已解锁食物汇总
     var allFoods = new Set();
     FOOD_HISTORY.forEach(function(item) {
       if (item.food && item.food !== '停辅食') {
@@ -1054,10 +1072,9 @@
     var note = document.getElementById('foodNoteInput').value.trim();
     if (!food) { alert('请输入食物名称'); return; }
     
-    var dateStr = formatDateStr(currentDate);
-    var records = getDayRecords(FOOD_KEY, dateStr);
+    var records = getDayRecords(FOOD_KEY, currentDateStr);
     records.push({ time: getNowTime(), food: food, note: note });
-    setDayRecords(FOOD_KEY, dateStr, records);
+    setDayRecords(FOOD_KEY, currentDateStr, records);
     document.getElementById('foodItemInput').value = '';
     document.getElementById('foodNoteInput').value = '';
     renderFood();
@@ -1070,17 +1087,16 @@
     var index = parseInt(e.target.dataset.index);
     if (isNaN(index)) return;
     
-    var dateStr = formatDateStr(currentDate);
     var key;
     if (type === 'milk') key = MILK_KEY;
     else if (type === 'poop') key = POOP_KEY;
     else if (type === 'food') key = FOOD_KEY;
     else return;
     
-    var records = getDayRecords(key, dateStr);
+    var records = getDayRecords(key, currentDateStr);
     if (index >= 0 && index < records.length) {
       records.splice(index, 1);
-      setDayRecords(key, dateStr, records);
+      setDayRecords(key, currentDateStr, records);
       if (type === 'milk') renderMilk();
       else if (type === 'poop') renderPoop();
       else if (type === 'food') renderFood();
@@ -1090,13 +1106,14 @@
   // ============ 全局渲染 ============
   function renderAll() {
     // 更新日期显示
-    document.getElementById('dateDisplay').textContent = getDisplayDate(currentDate);
+    document.getElementById('dateDisplay').textContent = getDisplayDate(currentDateStr);
     
     // 更新宝宝年龄
     document.getElementById('babyAge').textContent = '🎂 ' + getBabyAgeString();
 
     // 设置默认时间
-    var isToday = formatDateStr(currentDate) === formatDateStr(new Date());
+    var todayStr = getLocalDateString();
+    var isToday = currentDateStr === todayStr;
     var nowTime = getNowTime();
     document.getElementById('milkTimeInput').value = isToday ? nowTime : '12:00';
     document.getElementById('poopTimeInput').value = isToday ? nowTime : '12:00';
