@@ -16,7 +16,7 @@
       background: #fef9f2;
       color: #4a4a4a;
       min-height: 100vh;
-      padding-bottom: 30px;
+      padding-bottom: 40px;
     }
 
     .app-container {
@@ -51,9 +51,9 @@
       background: #eef6fb;
       border: none;
       border-radius: 50%;
-      width: 38px;
-      height: 38px;
-      font-size: 1.3rem;
+      width: 40px;
+      height: 40px;
+      font-size: 1.4rem;
       cursor: pointer;
       color: #5a9cbf;
       display: flex;
@@ -61,6 +61,7 @@
       justify-content: center;
       font-weight: 600;
       transition: 0.2s;
+      flex-shrink: 0;
     }
     .nav-btn:active {
       background: #d4e7f5;
@@ -70,21 +71,23 @@
       font-weight: 600;
       color: #4a6e7f;
       background: #f8f3ee;
-      padding: 8px 14px;
+      padding: 10px 16px;
       border-radius: 25px;
       text-align: center;
-      min-width: 120px;
+      min-width: 130px;
+      flex-shrink: 0;
     }
     .today-badge {
       background: #f7d4e0;
       border: none;
       border-radius: 25px;
-      padding: 8px 14px;
-      font-size: 0.85rem;
+      padding: 10px 14px;
+      font-size: 0.9rem;
       font-weight: 700;
       color: #c47a95;
       cursor: pointer;
       white-space: nowrap;
+      flex-shrink: 0;
     }
     .today-badge:active {
       background: #f0c2d2;
@@ -102,7 +105,7 @@
     }
     .tab-btn {
       flex: 1;
-      padding: 10px 4px;
+      padding: 11px 4px;
       border: none;
       background: transparent;
       border-radius: 16px;
@@ -153,7 +156,7 @@
       color: #e8a850;
     }
 
-    /* 日程 */
+    /* 日程列表 */
     .schedule-list {
       list-style: none;
       overflow: hidden;
@@ -216,13 +219,14 @@
       color: #4a4a4a;
       outline: none;
     }
-    .input-row input:focus {
+    .input-row input:focus,
+    .input-row select:focus {
       border-color: #7eb8da;
     }
     .record-btn {
       border: none;
       border-radius: 16px;
-      padding: 12px 16px;
+      padding: 12px 18px;
       font-weight: 700;
       font-size: 0.95rem;
       cursor: pointer;
@@ -245,7 +249,7 @@
       opacity: 0.7;
     }
 
-    /* 摘要 */
+    /* 摘要行 */
     .summary-row {
       background: #fdf6f0;
       border-radius: 16px;
@@ -304,7 +308,7 @@
     .delete-btn {
       background: none;
       border: none;
-      font-size: 1.3rem;
+      font-size: 1.4rem;
       color: #ccc;
       cursor: pointer;
       padding: 4px 8px;
@@ -328,26 +332,28 @@
       display: flex;
       align-items: center;
       gap: 6px;
-      margin-bottom: 6px;
+      margin-bottom: 8px;
       font-size: 0.78rem;
     }
     .chart-label {
-      width: 48px;
+      width: 50px;
       text-align: right;
       color: #888;
+      flex-shrink: 0;
     }
     .chart-bar-bg {
       flex: 1;
-      height: 22px;
+      height: 24px;
       background: #f0ebe3;
-      border-radius: 11px;
+      border-radius: 12px;
       overflow: hidden;
       position: relative;
     }
     .chart-bar-fill {
       height: 100%;
-      border-radius: 11px;
+      border-radius: 12px;
       transition: width 0.4s;
+      min-width: 0;
     }
     .chart-bar-fill.green {
       background: #8cc97a;
@@ -356,18 +362,10 @@
       background: #e8847a;
     }
     .chart-value {
-      width: 42px;
+      width: 48px;
       font-weight: 600;
-      font-size: 0.78rem;
-    }
-    .chart-target-line {
-      position: absolute;
-      right: 0;
-      top: 0;
-      bottom: 0;
-      width: 2px;
-      background: rgba(0,0,0,0.15);
-      z-index: 1;
+      font-size: 0.8rem;
+      flex-shrink: 0;
     }
 
     /* 7天平均 */
@@ -380,6 +378,7 @@
       padding: 10px 14px;
       margin: 8px 0;
       font-size: 0.85rem;
+      gap: 6px;
     }
     .avg-change {
       font-weight: 700;
@@ -391,7 +390,7 @@
       color: #e8847a;
     }
 
-    /* 正常/不正常标记 */
+    /* 状态标记 */
     .status-badge {
       display: inline-block;
       padding: 3px 10px;
@@ -409,7 +408,7 @@
       color: #b33;
     }
 
-    /* 已吃食物标签 */
+    /* 食物标签 */
     .food-cloud {
       display: flex;
       flex-wrap: wrap;
@@ -425,23 +424,29 @@
       font-weight: 600;
     }
 
-    /* 辅食日志 */
+    /* 辅食历史日志 */
     .food-log-item {
       padding: 10px 0;
       border-bottom: 1px solid #f5ede5;
-      font-size: 0.85rem;
-      line-height: 1.5;
+      font-size: 0.82rem;
+      line-height: 1.6;
     }
     .food-log-date {
       font-weight: 700;
       color: #c47a3a;
     }
 
+    /* Tab内容显示/隐藏 */
     .tab-content {
       display: none;
     }
     .tab-content.active {
       display: block;
+    }
+
+    .full-width-btn {
+      width: 100%;
+      margin-top: 6px;
     }
   </style>
 </head>
@@ -452,7 +457,7 @@
   <!-- 日期导航 -->
   <div class="date-nav">
     <button class="nav-btn" id="prevDayBtn">‹</button>
-    <div class="date-display" id="dateDisplay"></div>
+    <div class="date-display" id="dateDisplay">加载中...</div>
     <button class="nav-btn" id="nextDayBtn">›</button>
     <button class="today-badge" id="todayBtn">📅 今天</button>
   </div>
@@ -507,13 +512,11 @@
         <span class="summary-label">今日总奶量</span>
         <span class="summary-value milk-color-text" id="milkTotalDisplay">0 ml</span>
       </div>
-      <!-- Rolling 7-day average -->
       <div class="avg-row" id="milkAvgRow">
         <span>📊 近7天日均</span>
         <span id="milk7DayAvg">-- ml</span>
         <span class="avg-change" id="milkAvgChange">--</span>
       </div>
-      <!-- 近7天柱状图 -->
       <div class="chart-container" id="milkChart"></div>
       <ul class="record-list" id="milkRecordList"></ul>
     </div>
@@ -527,7 +530,7 @@
       </div>
       <div class="input-row">
         <input type="time" id="poopTimeInput">
-        <select id="poopStatusSelect" style="flex:0.8;">
+        <select id="poopStatusSelect">
           <option value="normal">✅ 正常</option>
           <option value="abnormal">⚠️ 不正常</option>
         </select>
@@ -535,7 +538,7 @@
       <div class="input-row" id="poopAbnormalRow" style="display:none;">
         <input type="text" id="poopDescInput" placeholder="请描述异常细节...">
       </div>
-      <button class="record-btn poop-btn" id="addPoopBtn" style="width:100%;">➕ 记录粑粑</button>
+      <button class="record-btn poop-btn full-width-btn" id="addPoopBtn">➕ 记录粑粑</button>
       <div class="summary-row">
         <span class="summary-label">今日次数</span>
         <span class="summary-value poop-color-text" id="poopCountDisplay">0 次</span>
@@ -554,34 +557,33 @@
         <input type="text" id="foodItemInput" placeholder="食物名称（如：胡萝卜泥）">
         <input type="text" id="foodNoteInput" placeholder="备注（可选）">
       </div>
-      <button class="record-btn food-btn" id="addFoodBtn" style="width:100%;">➕ 记录辅食</button>
+      <button class="record-btn food-btn full-width-btn" id="addFoodBtn">➕ 记录辅食</button>
       <div style="margin-top:14px;">
         <strong>🍽️ 已解锁食物：</strong>
         <div class="food-cloud" id="foodCloud"></div>
       </div>
       <ul class="record-list" id="foodRecordList"></ul>
     </div>
-    <!-- 历史辅食日志（固定展示） -->
     <div class="card">
       <div class="card-header">
         <div class="card-title food-color">📖 辅食历史日志</div>
       </div>
-      <div id="foodHistoryLog" style="font-size:0.85rem;max-height:400px;overflow-y:auto;"></div>
+      <div id="foodHistoryLog" style="font-size:0.82rem;max-height:400px;overflow-y:auto;"></div>
     </div>
   </div>
 </div>
 
 <script>
 (function() {
-  // 存储key
-  const MILK_KEY = 'baby_milk_v2';
-  const POOP_KEY = 'baby_poop_v2';
-  const FOOD_KEY = 'baby_food_v2';
+  // ============ 存储key ============
+  const MILK_KEY = 'baby_milk_v3';
+  const POOP_KEY = 'baby_poop_v3';
+  const FOOD_KEY = 'baby_food_v3';
 
   let currentDate = new Date();
-  const DAILY_TARGET = 800; // 每日奶量目标
+  const DAILY_TARGET = 800;
 
-  // 辅食历史数据（固定）
+  // ============ 辅食固定历史数据 ============
   const FOOD_HISTORY = [
     { day:1, date:'3.22', age:'5个月16天', food:'Gerber燕麦糊（很稀，1:6）', amount:'1勺半', note:'平静吃完，无不良反应' },
     { day:2, date:'3.23', age:'5个月17天', food:'Gerber燕麦糊（较稠，1:4）', amount:'3小勺', note:'略有兴趣，第一口皱眉，无不良反应，粑粑绿色比较稀，能渗进尿布' },
@@ -594,7 +596,7 @@
     { day:9, date:'3.30', age:'5个月24天', food:'Gerber燕麦糊', amount:'两小勺（干的两小勺兑水）', note:'拉了粑粑，稀' },
     { day:10, date:'3.30-4.1', age:'', food:'停辅食', amount:'', note:'粑粑稀，观察休养。4.1看医生，医生说没事，开始吃益生菌' },
     { day:12, date:'4.2', age:'5个月27天', food:'Earth Best燕麦糊', amount:'两小勺', note:'吃的乖，拉了粑粑，绿色粘稠糊糊，有一点点水便分离，感觉在好转' },
-    { day:13, date:'4.3', age:'5个月28天', food:'胡萝卜小米糊糊', amount:'6小勺尖尖', note:'喜欢吃，没有拉粑粑' },
+    { day:13, date:'4.3', age:'5个月28天', food:'胡萝卜小米糊糊', amount:'6小勺尖尖', note:'第二次吃胡萝卜，喜欢吃，没有拉粑粑' },
     { day:14, date:'4.4', age:'', food:'胡萝卜糊糊', amount:'', note:'第三次吃，喜欢吃，没有拉粑粑' },
     { day:15, date:'4.5', age:'', food:'胡萝卜糊糊', amount:'', note:'拉了黄绿色细腻粑粑，稍微还有一点水边分离，继续好转' },
     { day:16, date:'4.6', age:'', food:'红薯泥', amount:'', note:'第一次吃，喜欢吃，没有不良反应' },
@@ -615,203 +617,403 @@
     { day:31, date:'4.21', age:'', food:'鸡肉 + 燕麦糊', amount:'', note:'上午第一次鸡肉无不良反应，下午燕麦糊，洗澡前拉了一点粑粑，黄稠臭' },
   ];
 
-  // 工具函数
+  // ============ 工具函数 ============
   function formatDateStr(d) {
     const y = d.getFullYear();
-    const m = String(d.getMonth()+1).padStart(2,'0');
-    const day = String(d.getDate()).padStart(2,'0');
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
     return `${y}-${m}-${day}`;
   }
+
   function getDisplayDate(d) {
-    const wd = ['日','一','二','三','四','五','六'];
-    const m = d.getMonth()+1;
+    const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
+    const m = d.getMonth() + 1;
     const day = d.getDate();
-    const w = wd[d.getDay()];
+    const w = weekdays[d.getDay()];
     const isToday = formatDateStr(d) === formatDateStr(new Date());
-    return `${m}月${day}日 周${w}${isToday?' (今天)':''}`;
+    return `${m}月${day}日 周${w}${isToday ? ' (今天)' : ''}`;
   }
+
   function getNowTime() {
     const n = new Date();
-    return String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
+    return String(n.getHours()).padStart(2, '0') + ':' + String(n.getMinutes()).padStart(2, '0');
   }
+
   function loadData(key) {
-    try { return JSON.parse(localStorage.getItem(key)) || {}; } catch { return {}; }
+    try {
+      const stored = localStorage.getItem(key);
+      return stored ? JSON.parse(stored) : {};
+    } catch (e) {
+      return {};
+    }
   }
-  function saveData(key, data) { localStorage.setItem(key, JSON.stringify(data)); }
+
+  function saveData(key, data) {
+    localStorage.setItem(key, JSON.stringify(data));
+  }
+
   function getDayRecords(key, dateStr) {
     const all = loadData(key);
     return all[dateStr] || [];
   }
+
   function setDayRecords(key, dateStr, records) {
     const all = loadData(key);
-    if (records.length===0) delete all[dateStr];
-    else all[dateStr] = records;
+    if (records.length === 0) {
+      delete all[dateStr];
+    } else {
+      all[dateStr] = records;
+    }
     saveData(key, all);
   }
 
-  // 获取近N天日期列表
   function getLastNDates(n, endDate) {
     const dates = [];
     const d = new Date(endDate);
-    for (let i=n-1; i>=0; i--) {
+    for (let i = n - 1; i >= 0; i--) {
       const dd = new Date(d);
-      dd.setDate(dd.getDate()-i);
+      dd.setDate(dd.getDate() - i);
       dates.push(formatDateStr(dd));
     }
     return dates;
   }
 
-  // ========== Tab切换 ==========
-  document.querySelectorAll('.tab-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-      document.getElementById('tab-'+btn.dataset.tab).classList.add('active');
+  // ============ Tab切换 ============
+  document.querySelectorAll('.tab-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+      this.classList.add('active');
+      document.querySelectorAll('.tab-content').forEach(function(c) { c.classList.remove('active'); });
+      var tabId = 'tab-' + this.dataset.tab;
+      document.getElementById(tabId).classList.add('active');
     });
   });
 
-  // ========== 日期导航 ==========
-  document.getElementById('prevDayBtn').addEventListener('click', ()=>{
-    currentDate.setDate(currentDate.getDate()-1);
+  // ============ 日期导航 ============
+  document.getElementById('prevDayBtn').addEventListener('click', function() {
+    currentDate.setDate(currentDate.getDate() - 1);
     renderAll();
   });
-  document.getElementById('nextDayBtn').addEventListener('click', ()=>{
-    currentDate.setDate(currentDate.getDate()+1);
+  document.getElementById('nextDayBtn').addEventListener('click', function() {
+    currentDate.setDate(currentDate.getDate() + 1);
     renderAll();
   });
-  document.getElementById('todayBtn').addEventListener('click', ()=>{
+  document.getElementById('todayBtn').addEventListener('click', function() {
     currentDate = new Date();
     renderAll();
   });
 
-  // 日程折叠
-  document.getElementById('toggleScheduleBtn').addEventListener('click', ()=>{
-    const list = document.getElementById('scheduleList');
-    const btn = document.getElementById('toggleScheduleBtn');
-    if(list.classList.contains('expanded')) {
-      list.classList.remove('expanded'); list.classList.add('collapsed'); btn.textContent='展开';
+  // ============ 日程折叠 ============
+  document.getElementById('toggleScheduleBtn').addEventListener('click', function() {
+    var list = document.getElementById('scheduleList');
+    var btn = document.getElementById('toggleScheduleBtn');
+    if (list.classList.contains('expanded')) {
+      list.classList.remove('expanded');
+      list.classList.add('collapsed');
+      btn.textContent = '展开';
     } else {
-      list.classList.remove('collapsed'); list.classList.add('expanded'); btn.textContent='收起';
+      list.classList.remove('collapsed');
+      list.classList.add('expanded');
+      btn.textContent = '收起';
     }
   });
 
-  // ========== 喂奶渲染 ==========
-  function renderMilk() {
-    const dateStr = formatDateStr(currentDate);
-    const records = getDayRecords(MILK_KEY, dateStr);
-    const listEl = document.getElementById('milkRecordList');
-    const totalEl = document.getElementById('milkTotalDisplay');
+  // ============ 粑粑状态切换（显示/隐藏异常输入框） ============
+  document.getElementById('poopStatusSelect').addEventListener('change', function() {
+    var row = document.getElementById('poopAbnormalRow');
+    if (this.value === 'abnormal') {
+      row.style.display = 'flex';
+    } else {
+      row.style.display = 'none';
+    }
+  });
 
-    if(records.length===0) {
+  // ============ 喂奶渲染 ============
+  function renderMilk() {
+    var dateStr = formatDateStr(currentDate);
+    var records = getDayRecords(MILK_KEY, dateStr);
+    var listEl = document.getElementById('milkRecordList');
+    var totalEl = document.getElementById('milkTotalDisplay');
+
+    if (records.length === 0) {
       listEl.innerHTML = '<li class="empty-msg">今天还没有喂奶记录</li>';
     } else {
-      const sorted = [...records].sort((a,b)=>a.time.localeCompare(b.time));
-      listEl.innerHTML = sorted.map((r,i)=>{
-        const origIdx = records.indexOf(r);
-        return `<li class="record-item">
-          <span class="record-time">${r.time}</span>
-          <span class="record-detail"></span>
-          <span class="record-amount">${r.amount} ml</span>
-          <button class="delete-btn" data-type="milk" data-index="${origIdx}">✕</button>
-        </li>`;
+      var sorted = records.slice().sort(function(a, b) { return a.time.localeCompare(b.time); });
+      listEl.innerHTML = sorted.map(function(r) {
+        var origIdx = records.indexOf(r);
+        return '<li class="record-item">' +
+          '<span class="record-time">' + r.time + '</span>' +
+          '<span class="record-detail"></span>' +
+          '<span class="record-amount">' + r.amount + ' ml</span>' +
+          '<button class="delete-btn" data-type="milk" data-index="' + origIdx + '">✕</button>' +
+        '</li>';
       }).join('');
     }
-    const total = records.reduce((s,r)=>s+(Number(r.amount)||0),0);
-    totalEl.textContent = `${total} ml`;
 
-    // 近7天柱状图 & rolling average
+    var total = records.reduce(function(s, r) { return s + (Number(r.amount) || 0); }, 0);
+    totalEl.textContent = total + ' ml';
+
     renderMilkChart(dateStr, total);
     renderMilkAvg(dateStr);
   }
 
   function renderMilkChart(currentDateStr, todayTotal) {
-    const chartEl = document.getElementById('milkChart');
-    const last7 = getLastNDates(7, currentDate);
-    let html = '<div style="font-weight:600;margin-bottom:6px;">📊 近7天奶量 (目标800ml)</div>';
-    last7.forEach(ds => {
-      const recs = getDayRecords(MILK_KEY, ds);
-      const sum = recs.reduce((s,r)=>s+(Number(r.amount)||0),0);
-      const pct = Math.min(100, (sum/DAILY_TARGET)*100);
-      const colorClass = sum >= DAILY_TARGET ? 'green' : 'red';
-      const d = new Date(ds);
-      const label = `${d.getMonth()+1}/${d.getDate()}`;
-      const isToday = ds === currentDateStr;
-      html += `<div class="chart-bar-row">
-        <span class="chart-label">${label}${isToday?'⭐':''}</span>
-        <div class="chart-bar-bg">
-          <div class="chart-bar-fill ${colorClass}" style="width:${pct}%;"></div>
-          <div class="chart-target-line" style="left:${(DAILY_TARGET/1000)*100}%;"></div>
-        </div>
-        <span class="chart-value" style="color:${sum>=DAILY_TARGET?'#4a7a3a':'#b33'}">${sum}ml</span>
-      </div>`;
+    var chartEl = document.getElementById('milkChart');
+    var last7 = getLastNDates(7, currentDate);
+    var html = '<div style="font-weight:600;margin-bottom:8px;">📊 近7天奶量 (目标' + DAILY_TARGET + 'ml)</div>';
+    
+    last7.forEach(function(ds) {
+      var recs = getDayRecords(MILK_KEY, ds);
+      var sum = recs.reduce(function(s, r) { return s + (Number(r.amount) || 0); }, 0);
+      var pct = Math.min(100, (sum / DAILY_TARGET) * 100);
+      var colorClass = sum >= DAILY_TARGET ? 'green' : 'red';
+      var d = new Date(ds);
+      var label = (d.getMonth() + 1) + '/' + d.getDate();
+      var isToday = ds === currentDateStr;
+      
+      html += '<div class="chart-bar-row">' +
+        '<span class="chart-label">' + label + (isToday ? '⭐' : '') + '</span>' +
+        '<div class="chart-bar-bg">' +
+          '<div class="chart-bar-fill ' + colorClass + '" style="width:' + pct + '%;"></div>' +
+        '</div>' +
+        '<span class="chart-value" style="color:' + (sum >= DAILY_TARGET ? '#4a7a3a' : '#b33') + '">' + sum + 'ml</span>' +
+      '</div>';
     });
-    html += '<div style="font-size:0.7rem;color:#999;text-align:right;">虚线=800ml目标</div>';
+    
+    html += '<div style="font-size:0.7rem;color:#999;text-align:right;">绿色=达标 红色=未达标</div>';
     chartEl.innerHTML = html;
   }
 
   function renderMilkAvg(currentDateStr) {
-    const last7 = getLastNDates(7, currentDate);
-    const prev7 = getLastNDates(14, currentDate).slice(0,7);
-    const calcAvg = (dates) => {
-      let total=0, count=0;
-      dates.forEach(ds=>{
-        const recs = getDayRecords(MILK_KEY, ds);
-        const sum = recs.reduce((s,r)=>s+(Number(r.amount)||0),0);
-        total+=sum; count++;
+    var last7 = getLastNDates(7, currentDate);
+    var prev7 = getLastNDates(14, currentDate).slice(0, 7);
+    
+    function calcAvg(dates) {
+      var total = 0, count = 0;
+      dates.forEach(function(ds) {
+        var recs = getDayRecords(MILK_KEY, ds);
+        var sum = recs.reduce(function(s, r) { return s + (Number(r.amount) || 0); }, 0);
+        total += sum;
+        count++;
       });
-      return count>0 ? Math.round(total/count) : 0;
-    };
-    const thisWeek = calcAvg(last7);
-    const prevWeek = calcAvg(prev7);
-    document.getElementById('milk7DayAvg').textContent = `${thisWeek} ml`;
-    const changeEl = document.getElementById('milkAvgChange');
-    if(prevWeek===0) {
+      return count > 0 ? Math.round(total / count) : 0;
+    }
+    
+    var thisWeek = calcAvg(last7);
+    var prevWeek = calcAvg(prev7);
+    
+    document.getElementById('milk7DayAvg').textContent = thisWeek + ' ml';
+    var changeEl = document.getElementById('milkAvgChange');
+    
+    if (prevWeek === 0) {
       changeEl.textContent = '';
       changeEl.className = 'avg-change';
     } else {
-      const diff = thisWeek - prevWeek;
-      const sign = diff>=0 ? '+' : '';
-      changeEl.textContent = `${sign}${diff} ml vs上周`;
-      changeEl.className = 'avg-change ' + (diff>=0 ? 'positive' : 'negative');
+      var diff = thisWeek - prevWeek;
+      var sign = diff >= 0 ? '+' : '';
+      changeEl.textContent = sign + diff + ' ml vs上周';
+      changeEl.className = 'avg-change ' + (diff >= 0 ? 'positive' : 'negative');
     }
   }
 
-  // ========== 粑粑渲染 ==========
-  function renderPoop() {
-    const dateStr = formatDateStr(currentDate);
-    const records = getDayRecords(POOP_KEY, dateStr);
-    const listEl = document.getElementById('poopRecordList');
-    const countEl = document.getElementById('poopCountDisplay');
+  // ============ 喂奶添加 ============
+  document.getElementById('addMilkBtn').addEventListener('click', function() {
+    var time = document.getElementById('milkTimeInput').value;
+    var amount = parseInt(document.getElementById('milkAmountInput').value);
+    if (!time) { alert('请选择时间'); return; }
+    if (isNaN(amount) || amount <= 0) { alert('请输入有效的奶量'); return; }
+    
+    var dateStr = formatDateStr(currentDate);
+    var records = getDayRecords(MILK_KEY, dateStr);
+    records.push({ time: time, amount: amount });
+    setDayRecords(MILK_KEY, dateStr, records);
+    document.getElementById('milkAmountInput').value = '';
+    renderMilk();
+  });
 
-    if(records.length===0) {
+  // ============ 粑粑渲染 ============
+  function renderPoop() {
+    var dateStr = formatDateStr(currentDate);
+    var records = getDayRecords(POOP_KEY, dateStr);
+    var listEl = document.getElementById('poopRecordList');
+    var countEl = document.getElementById('poopCountDisplay');
+
+    if (records.length === 0) {
       listEl.innerHTML = '<li class="empty-msg">今天还没有粑粑记录</li>';
     } else {
-      const sorted = [...records].sort((a,b)=>a.time.localeCompare(b.time));
-      listEl.innerHTML = sorted.map((r,i)=>{
-        const origIdx = records.indexOf(r);
-        const statusClass = r.status==='normal' ? 'normal' : 'abnormal';
-        const statusText = r.status==='normal' ? '✅正常' : '⚠️不正常';
-        const noteText = r.note ? ` - ${r.note}` : '';
-        return `<li class="record-item">
-          <span class="record-time">${r.time}</span>
-          <span class="record-detail">
-            <span class="status-badge ${statusClass}">${statusText}</span>${noteText}
-          </span>
-          <button class="delete-btn" data-type="poop" data-index="${origIdx}">✕</button>
-        </li>`;
+      var sorted = records.slice().sort(function(a, b) { return a.time.localeCompare(b.time); });
+      listEl.innerHTML = sorted.map(function(r) {
+        var origIdx = records.indexOf(r);
+        var statusClass = r.status === 'normal' ? 'normal' : 'abnormal';
+        var statusText = r.status === 'normal' ? '✅正常' : '⚠️不正常';
+        var noteText = r.note ? ' - ' + r.note : '';
+        return '<li class="record-item">' +
+          '<span class="record-time">' + r.time + '</span>' +
+          '<span class="record-detail">' +
+            '<span class="status-badge ' + statusClass + '">' + statusText + '</span>' + noteText +
+          '</span>' +
+          '<button class="delete-btn" data-type="poop" data-index="' + origIdx + '">✕</button>' +
+        '</li>';
       }).join('');
     }
-    countEl.textContent = `${records.length} 次`;
+    countEl.textContent = records.length + ' 次';
   }
 
-  // ========== 辅食渲染 ==========
-  function renderFood() {
-    const dateStr = formatDateStr(currentDate);
-    const records = getDayRecords(FOOD_KEY, dateStr);
-    const listEl = document.getElementById('foodRecordList');
-    const cloudEl = document.getElementById('foodCloud');
+  // ============ 粑粑添加 ============
+  document.getElementById('addPoopBtn').addEventListener('click', function() {
+    var time = document.getElementById('poopTimeInput').value;
+    var status = document.getElementById('poopStatusSelect').value;
+    var note = '';
+    if (status === 'abnormal') {
+      note = document.getElementById('poopDescInput').value.trim();
+      if (!note) { alert('请描述异常细节'); return; }
+    }
+    if (!time) { alert('请选择时间'); return; }
+    
+    var dateStr = formatDateStr(currentDate);
+    var records = getDayRecords(POOP_KEY, dateStr);
+    records.push({ time: time, status: status, note: note });
+    setDayRecords(POOP_KEY, dateStr, records);
+    document.getElementById('poopDescInput').value = '';
+    document.getElementById('poopStatusSelect').value = 'normal';
+    document.getElementById('poopAbnormalRow').style.display = 'none';
+    renderPoop();
+  });
 
-    if(records.length===0) {
+  // ============ 辅食渲染 ============
+  function renderFood() {
+    var dateStr = formatDateStr(currentDate);
+    var records = getDayRecords(FOOD_KEY, dateStr);
+    var listEl = document.getElementById('foodRecordList');
+    var cloudEl = document.getElementById('foodCloud');
+
+    // 当天记录
+    if (records.length === 0) {
       listEl.innerHTML = '<li class="empty-msg">今天还没有辅食记录</li>';
-   
+    } else {
+      var sorted = records.slice().sort(function(a, b) { return a.time ? a.time.localeCompare(b.time) : 0; });
+      listEl.innerHTML = sorted.map(function(r) {
+        var origIdx = records.indexOf(r);
+        return '<li class="record-item">' +
+          (r.time ? '<span class="record-time">' + r.time + '</span>' : '') +
+          '<span class="record-detail"><strong>' + r.food + '</strong>' + (r.note ? ' - ' + r.note : '') + '</span>' +
+          '<button class="delete-btn" data-type="food" data-index="' + origIdx + '">✕</button>' +
+        '</li>';
+      }).join('');
+    }
+
+    // 已解锁食物汇总（从历史+当前记录）
+    var allFoods = new Set();
+    // 从历史日志提取
+    FOOD_HISTORY.forEach(function(item) {
+      if (item.food && item.food !== '停辅食') {
+        var names = item.food.split('+');
+        names.forEach(function(n) {
+          var cleaned = n.trim().replace(/（.*?）/g, '').replace(/\(.*?\)/g, '').replace(/[0-9\/]/g, '').trim();
+          if (cleaned) allFoods.add(cleaned);
+        });
+      }
+    });
+    // 从用户记录提取
+    var allUserFood = loadData(FOOD_KEY);
+    Object.keys(allUserFood).forEach(function(d) {
+      (allUserFood[d] || []).forEach(function(r) {
+        if (r.food) {
+          var names = r.food.split('+');
+          names.forEach(function(n) {
+            var cleaned = n.trim().replace(/（.*?）/g, '').replace(/\(.*?\)/g, '').replace(/[0-9\/]/g, '').trim();
+            if (cleaned) allFoods.add(cleaned);
+          });
+        }
+      });
+    });
+    
+    cloudEl.innerHTML = '';
+    allFoods.forEach(function(f) {
+      var tag = document.createElement('span');
+      tag.className = 'food-tag';
+      tag.textContent = f;
+      cloudEl.appendChild(tag);
+    });
+    if (allFoods.size === 0) {
+      cloudEl.innerHTML = '<span style="color:#999;">暂无记录</span>';
+    }
+
+    // 渲染历史日志
+    renderFoodHistory();
+  }
+
+  function renderFoodHistory() {
+    var container = document.getElementById('foodHistoryLog');
+    var html = '';
+    FOOD_HISTORY.forEach(function(item) {
+      html += '<div class="food-log-item">' +
+        '<span class="food-log-date">Day ' + item.day + ' (' + item.date + ')</span>' +
+        (item.age ? ' <span style="color:#888;">' + item.age + '</span>' : '') +
+        '<br><strong>' + item.food + '</strong>' +
+        (item.amount ? ' · ' + item.amount : '') +
+        '<br><span style="color:#666;">' + item.note + '</span>' +
+      '</div>';
+    });
+    container.innerHTML = html;
+  }
+
+  // ============ 辅食添加 ============
+  document.getElementById('addFoodBtn').addEventListener('click', function() {
+    var food = document.getElementById('foodItemInput').value.trim();
+    var note = document.getElementById('foodNoteInput').value.trim();
+    if (!food) { alert('请输入食物名称'); return; }
+    
+    var dateStr = formatDateStr(currentDate);
+    var records = getDayRecords(FOOD_KEY, dateStr);
+    records.push({ time: getNowTime(), food: food, note: note });
+    setDayRecords(FOOD_KEY, dateStr, records);
+    document.getElementById('foodItemInput').value = '';
+    document.getElementById('foodNoteInput').value = '';
+    renderFood();
+  });
+
+  // ============ 全局删除 ============
+  document.body.addEventListener('click', function(e) {
+    if (!e.target.classList.contains('delete-btn')) return;
+    var type = e.target.dataset.type;
+    var index = parseInt(e.target.dataset.index);
+    if (isNaN(index)) return;
+    
+    var dateStr = formatDateStr(currentDate);
+    var key;
+    if (type === 'milk') key = MILK_KEY;
+    else if (type === 'poop') key = POOP_KEY;
+    else if (type === 'food') key = FOOD_KEY;
+    else return;
+    
+    var records = getDayRecords(key, dateStr);
+    if (index >= 0 && index < records.length) {
+      records.splice(index, 1);
+      setDayRecords(key, dateStr, records);
+      if (type === 'milk') renderMilk();
+      else if (type === 'poop') renderPoop();
+      else if (type === 'food') renderFood();
+    }
+  });
+
+  // ============ 全局渲染 ============
+  function renderAll() {
+    document.getElementById('dateDisplay').textContent = getDisplayDate(currentDate);
+
+    var isToday = formatDateStr(currentDate) === formatDateStr(new Date());
+    var nowTime = getNowTime();
+    document.getElementById('milkTimeInput').value = isToday ? nowTime : '12:00';
+    document.getElementById('poopTimeInput').value = isToday ? nowTime : '12:00';
+
+    renderMilk();
+    renderPoop();
+    renderFood();
+  }
+
+  // ============ 初始加载 ============
+  renderAll();
+})();
+</script>
+</body>
+</html>
