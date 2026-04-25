@@ -25,14 +25,28 @@
       padding: 12px 14px 20px;
     }
 
-    /* 标题 */
-    .app-title {
+    /* 标题区域 */
+    .app-header {
       text-align: center;
+      padding: 10px 0 6px;
+    }
+    .app-title {
       font-size: 1.6rem;
       font-weight: 700;
       color: #7eb8da;
-      padding: 10px 0 6px;
       letter-spacing: 1px;
+      margin-bottom: 4px;
+    }
+    .baby-age {
+      font-size: 0.95rem;
+      color: #c47a95;
+      font-weight: 600;
+      background: #fff;
+      display: inline-block;
+      padding: 6px 18px;
+      border-radius: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      margin-top: 2px;
     }
 
     /* 日期导航 */
@@ -43,7 +57,7 @@
       background: #fff;
       border-radius: 30px;
       padding: 6px 8px;
-      margin: 10px 0 16px;
+      margin: 12px 0 16px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.04);
       gap: 4px;
     }
@@ -277,6 +291,17 @@
       color: #c47a3a;
     }
 
+    /* 频率信息框 */
+    .freq-box {
+      background: #f2f6ec;
+      border-radius: 14px;
+      padding: 10px 14px;
+      margin: 8px 0;
+      font-size: 0.85rem;
+      color: #5d6b45;
+      text-align: center;
+    }
+
     /* 记录列表 */
     .record-list {
       list-style: none;
@@ -452,7 +477,10 @@
 </head>
 <body>
 <div class="app-container">
-  <div class="app-title">👶 宝宝日常追踪</div>
+  <div class="app-header">
+    <div class="app-title">👶 宝宝日常追踪</div>
+    <div class="baby-age" id="babyAge">加载中...</div>
+  </div>
 
   <!-- 日期导航 -->
   <div class="date-nav">
@@ -543,6 +571,8 @@
         <span class="summary-label">今日次数</span>
         <span class="summary-value poop-color-text" id="poopCountDisplay">0 次</span>
       </div>
+      <!-- 排便频率统计 -->
+      <div class="freq-box" id="poopFreqBox">📊 加载排便频率...</div>
       <ul class="record-list" id="poopRecordList"></ul>
     </div>
   </div>
@@ -575,13 +605,14 @@
 
 <script>
 (function() {
-  // ============ 存储key ============
+  // ============ 常量 ============
+  const BIRTH_DATE = new Date(2025, 9, 7); // 2025年10月7日（月份从0开始）
   const MILK_KEY = 'baby_milk_v3';
   const POOP_KEY = 'baby_poop_v3';
   const FOOD_KEY = 'baby_food_v3';
+  const DAILY_TARGET = 800;
 
   let currentDate = new Date();
-  const DAILY_TARGET = 800;
 
   // ============ 辅食固定历史数据 ============
   const FOOD_HISTORY = [
@@ -639,6 +670,23 @@
     return String(n.getHours()).padStart(2, '0') + ':' + String(n.getMinutes()).padStart(2, '0');
   }
 
+  // 计算宝宝年龄
+  function getBabyAge(birthDate, targetDate) {
+    const diffMs = targetDate - birthDate;
+    const totalDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    const months = Math.floor(totalDays / 30.4375);
+    const days = Math.floor(totalDays - months * 30.4375);
+    return { months: months, days: days, totalDays: totalDays };
+  }
+
+  function getBabyAgeString() {
+    const age = getBabyAge(BIRTH_DATE, currentDate);
+    if (age.totalDays < 0) return '尚未出生';
+    if (age.months === 0) return `${age.days} 天`;
+    return `${age.months} 个月 ${age.days} 天`;
+  }
+
+  // localStorage操作
   function loadData(key) {
     try {
       const stored = localStorage.getItem(key);
@@ -676,6 +724,47 @@
       dates.push(formatDateStr(dd));
     }
     return dates;
+  }
+
+  // 计算排便频率（平均几天拉一次）
+  function calculatePoopFrequency() {
+    const allPoopData = loadData(POOP_KEY);
+    // 收集所有有粑粑记录的日期
+    const datesWithPoop = Object.keys(allPoopData).filter(function(date) {
+      const arr = allPoopData[date];
+      return Array.isArray(arr) && arr.length > 0;
+    }).sort();
+
+    if (datesWithPoop.length === 0) {
+      return { text: '暂无排便记录', avgDays: null };
+    }
+
+    if (datesWithPoop.length === 1) {
+      return { text: '仅有1天记录，至少需要2天才能计算频率', avgDays: null };
+    }
+
+    // 计算跨度和平均间隔
+    const firstDate = new Date(datesWithPoop[0]);
+    const lastDate = new Date(datesWithPoop[datesWithPoop.length - 1]);
+    const totalSpanDays = Math.round((lastDate - firstDate) / (1000 * 60 * 60 * 24)) + 1;
+    
+    // 平均间隔：总跨度天数 / (有记录的天数 - 1) 更合理
+    // 或者：总跨度天数 / 有记录的天数
+    const avgDays1 = (totalSpanDays / datesWithPoop.length).toFixed(1);
+    
+    // 计算每次排便之间的实际间隔
+    const intervals = [];
+    for (let i = 1; i < datesWithPoop.length; i++) {
+      const d1 = new Date(datesWithPoop[i - 1]);
+      const d2 = new Date(datesWithPoop[i]);
+      const gap = Math.round((d2 - d1) / (1000 * 60 * 60 * 24));
+      intervals.push(gap);
+    }
+    const sumIntervals = intervals.reduce(function(s, v) { return s + v; }, 0);
+    const avgDays2 = (sumIntervals / intervals.length).toFixed(1);
+    
+    const text = `📊 平均排便频率：约每 ${avgDays2} 天一次（共 ${datesWithPoop.length} 天有记录，跨度 ${totalSpanDays} 天）`;
+    return { text: text, avgDays: parseFloat(avgDays2) };
   }
 
   // ============ Tab切换 ============
@@ -718,7 +807,7 @@
     }
   });
 
-  // ============ 粑粑状态切换（显示/隐藏异常输入框） ============
+  // ============ 粑粑状态切换 ============
   document.getElementById('poopStatusSelect').addEventListener('change', function() {
     var row = document.getElementById('poopAbnormalRow');
     if (this.value === 'abnormal') {
@@ -753,11 +842,11 @@
     var total = records.reduce(function(s, r) { return s + (Number(r.amount) || 0); }, 0);
     totalEl.textContent = total + ' ml';
 
-    renderMilkChart(dateStr, total);
+    renderMilkChart(dateStr);
     renderMilkAvg(dateStr);
   }
 
-  function renderMilkChart(currentDateStr, todayTotal) {
+  function renderMilkChart(currentDateStr) {
     var chartEl = document.getElementById('milkChart');
     var last7 = getLastNDates(7, currentDate);
     var html = '<div style="font-weight:600;margin-bottom:8px;">📊 近7天奶量 (目标' + DAILY_TARGET + 'ml)</div>';
@@ -837,6 +926,7 @@
     var records = getDayRecords(POOP_KEY, dateStr);
     var listEl = document.getElementById('poopRecordList');
     var countEl = document.getElementById('poopCountDisplay');
+    var freqBox = document.getElementById('poopFreqBox');
 
     if (records.length === 0) {
       listEl.innerHTML = '<li class="empty-msg">今天还没有粑粑记录</li>';
@@ -857,6 +947,10 @@
       }).join('');
     }
     countEl.textContent = records.length + ' 次';
+
+    // 排便频率统计
+    var freqResult = calculatePoopFrequency();
+    freqBox.textContent = freqResult.text;
   }
 
   // ============ 粑粑添加 ============
@@ -887,7 +981,6 @@
     var listEl = document.getElementById('foodRecordList');
     var cloudEl = document.getElementById('foodCloud');
 
-    // 当天记录
     if (records.length === 0) {
       listEl.innerHTML = '<li class="empty-msg">今天还没有辅食记录</li>';
     } else {
@@ -902,9 +995,8 @@
       }).join('');
     }
 
-    // 已解锁食物汇总（从历史+当前记录）
+    // 已解锁食物汇总
     var allFoods = new Set();
-    // 从历史日志提取
     FOOD_HISTORY.forEach(function(item) {
       if (item.food && item.food !== '停辅食') {
         var names = item.food.split('+');
@@ -914,7 +1006,6 @@
         });
       }
     });
-    // 从用户记录提取
     var allUserFood = loadData(FOOD_KEY);
     Object.keys(allUserFood).forEach(function(d) {
       (allUserFood[d] || []).forEach(function(r) {
@@ -939,7 +1030,6 @@
       cloudEl.innerHTML = '<span style="color:#999;">暂无记录</span>';
     }
 
-    // 渲染历史日志
     renderFoodHistory();
   }
 
@@ -999,8 +1089,13 @@
 
   // ============ 全局渲染 ============
   function renderAll() {
+    // 更新日期显示
     document.getElementById('dateDisplay').textContent = getDisplayDate(currentDate);
+    
+    // 更新宝宝年龄
+    document.getElementById('babyAge').textContent = '🎂 ' + getBabyAgeString();
 
+    // 设置默认时间
     var isToday = formatDateStr(currentDate) === formatDateStr(new Date());
     var nowTime = getNowTime();
     document.getElementById('milkTimeInput').value = isToday ? nowTime : '12:00';
