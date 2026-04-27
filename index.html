@@ -306,7 +306,7 @@
     }
     .chart-bar-fill.green { background: #8cc97a; }
     .chart-bar-fill.red { background: #e8847a; }
-    .chart-value { width: 48px; font-weight: 600; font-size: 0.8rem; flex-shrink: 0; }
+    .chart-value { width: 55px; font-weight: 600; font-size: 0.75rem; flex-shrink: 0; text-align: right; }
 
     .avg-row {
       display: flex;
@@ -318,10 +318,12 @@
       margin: 8px 0;
       font-size: 0.85rem;
       gap: 6px;
+      flex-wrap: wrap;
     }
     .avg-change { font-weight: 700; }
     .avg-change.positive { color: #8cc97a; }
     .avg-change.negative { color: #e8847a; }
+    .oz-convert { color: #888; font-size: 0.78rem; }
 
     .poop-detail-badge {
       display: inline-block;
@@ -383,6 +385,7 @@
     }
     .like-yes { background: #fff3cd; color: #856404; }
     .like-no { background: #f0f0f0; color: #666; }
+    .like-neutral { background: #e8e8e8; color: #555; }
 
     .prompt-box {
       background: #f8f4ee;
@@ -424,6 +427,37 @@
       background: #f9f5ee;
       font-weight: 600;
       color: #666;
+    }
+
+    .food-preference-table {
+      width: 100%;
+      font-size: 0.8rem;
+      border-collapse: collapse;
+      margin-top: 8px;
+    }
+    .food-preference-table th, .food-preference-table td {
+      padding: 8px 10px;
+      border-bottom: 1px solid #eee;
+      text-align: center;
+    }
+    .food-preference-table th {
+      background: #fefaf3;
+      font-weight: 700;
+      color: #c47a3a;
+    }
+    .rating-bar-bg {
+      width: 60px;
+      height: 10px;
+      background: #f0e8d8;
+      border-radius: 5px;
+      overflow: hidden;
+      display: inline-block;
+      vertical-align: middle;
+    }
+    .rating-bar-fill {
+      height: 100%;
+      background: #f0b860;
+      border-radius: 5px;
     }
   </style>
 </head>
@@ -492,7 +526,8 @@
       </div>
       <div class="avg-row" id="milkAvgRow">
         <span>📊 近7天日均</span>
-        <span id="milk7DayAvg">-- ml</span>
+        <span id="milk7DayAvg">--</span>
+        <span id="milk7DayAvgOz" class="oz-convert"></span>
         <span class="avg-change" id="milkAvgChange">--</span>
       </div>
       <div class="chart-container" id="milkChart"></div>
@@ -568,6 +603,13 @@
         <strong>🍽️ 已解锁食物：</strong>
         <div class="food-cloud" id="foodCloud"></div>
       </div>
+      <div style="margin-top:14px;">
+        <strong>❤️ 食材喜爱度统计：</strong>
+        <table class="food-preference-table" id="foodPreferenceTable">
+          <thead><tr><th>食材</th><th>尝试次数</th><th>喜爱度</th></tr></thead>
+          <tbody id="foodPreferenceBody"></tbody>
+        </table>
+      </div>
       <ul class="record-list" id="foodRecordList"></ul>
     </div>
     <div class="card">
@@ -590,10 +632,15 @@
 <script>
 (function() {
   const BIRTH_DATE = new Date(2025, 9, 7);
-  const MILK_KEY = 'baby_milk_v5';
-  const POOP_KEY = 'baby_poop_v5';
-  const FOOD_KEY = 'baby_food_v5';
+  const MILK_KEY = 'baby_milk_v6';
+  const POOP_KEY = 'baby_poop_v6';
+  const FOOD_KEY = 'baby_food_v6';
   const DAILY_TARGET = 800;
+  const ML_TO_OZ = 0.033814;
+
+  function mlToOz(ml) {
+    return (ml * ML_TO_OZ).toFixed(1);
+  }
 
   function getLocalDateString() {
     const now = new Date();
@@ -610,7 +657,6 @@
     return new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
   }
 
-  // 辅食固定历史数据（已包含过敏/喜欢字段，基于原始数据推断）
   const FOOD_HISTORY = [
     { day:1, date:'3.22', age:'5个月16天', food:'Gerber燕麦糊', amount:'1勺半', note:'平静吃完，无不良反应', allergy:'无', like:'喜欢' },
     { day:2, date:'3.23', age:'5个月17天', food:'Gerber燕麦糊', amount:'3小勺', note:'略有兴趣，无不良反应，粑粑绿色较稀', allergy:'无', like:'一般' },
@@ -706,10 +752,17 @@
     return dates;
   }
 
-  // ============ 获取所有辅食记录（历史+用户输入） ============
+  // 提取食材名称
+  function extractFoodNames(foodStr) {
+    if (!foodStr || foodStr === '停辅食') return [];
+    return foodStr.split('+').map(function(n) {
+      return n.trim().replace(/（.*?）/g, '').replace(/\(.*?\)/g, '').replace(/[0-9\/]/g, '').trim();
+    }).filter(function(n) { return n.length > 0; });
+  }
+
+  // 获取所有辅食记录
   function getAllFoodRecords() {
     const all = [];
-    // 历史记录
     FOOD_HISTORY.forEach(function(item) {
       if (item.food && item.food !== '停辅食') {
         all.push({
@@ -724,7 +777,6 @@
         });
       }
     });
-    // 用户记录
     const userData = loadData(FOOD_KEY);
     Object.keys(userData).forEach(function(ds) {
       (userData[ds] || []).forEach(function(r) {
@@ -740,11 +792,30 @@
         });
       });
     });
-    // 按日期排序
-    all.sort(function(a, b) {
-      return a.date.localeCompare(b.date);
-    });
+    all.sort(function(a, b) { return a.date.localeCompare(b.date); });
     return all;
+  }
+
+  // 计算食材喜爱度
+  function calculateFoodPreferences() {
+    const allRecords = getAllFoodRecords();
+    const foodMap = {};
+    
+    allRecords.forEach(function(record) {
+      const foods = extractFoodNames(record.food);
+      foods.forEach(function(food) {
+        if (!foodMap[food]) {
+          foodMap[food] = { total: 0, like: 0, neutral: 0, dislike: 0, allergy: 0 };
+        }
+        foodMap[food].total++;
+        if (record.like === '喜欢') foodMap[food].like++;
+        else if (record.like === '不喜欢') foodMap[food].dislike++;
+        else foodMap[food].neutral++;
+        if (record.allergy === '有') foodMap[food].allergy++;
+      });
+    });
+
+    return foodMap;
   }
 
   // ============ Tab切换 ============
@@ -867,6 +938,7 @@
     var thisWeek = calcAvg(last7);
     var prevWeek = calcAvg(prev7);
     document.getElementById('milk7DayAvg').textContent = thisWeek + ' ml';
+    document.getElementById('milk7DayAvgOz').textContent = '（≈ ' + mlToOz(thisWeek) + ' oz）';
     var changeEl = document.getElementById('milkAvgChange');
     if (prevWeek === 0) {
       changeEl.textContent = ''; changeEl.className = 'avg-change';
@@ -919,7 +991,6 @@
     }
     countEl.textContent = records.length + ' 次';
 
-    // 排便频率
     var allPoopData = loadData(POOP_KEY);
     var datesWithPoop = Object.keys(allPoopData).filter(function(d) {
       return Array.isArray(allPoopData[d]) && allPoopData[d].length > 0;
@@ -944,7 +1015,6 @@
       freqBox.textContent = `📊 平均排便频率：约每 ${avgDays} 天一次（共 ${datesWithPoop.length} 天有记录，跨度 ${totalSpanDays} 天）`;
     }
 
-    // 性状频率
     var allRecords = [];
     Object.keys(allPoopData).forEach(function(ds) {
       (allPoopData[ds] || []).forEach(function(r) {
@@ -967,7 +1037,6 @@
       textureFreqBox.textContent = '📊 性状频率（颜色-质地）：' + freqStr;
     }
 
-    // 性状历史表格
     var historyBody = document.getElementById('poopHistoryBody');
     if (allRecords.length === 0) {
       historyBody.innerHTML = '<tr><td colspan="3" style="color:#999;">暂无记录</td></tr>';
@@ -1010,7 +1079,7 @@
       listEl.innerHTML = sorted.map(function(r) {
         var origIdx = records.indexOf(r);
         var allergyBadge = r.allergy === '有' ? '<span class="allergy-badge allergy-warn">⚠️过敏</span>' : '<span class="allergy-badge allergy-safe">✅无过敏</span>';
-        var likeBadge = r.like === '喜欢' ? '<span class="like-badge like-yes">😋喜欢</span>' : (r.like === '不喜欢' ? '<span class="like-badge like-no">😣不喜欢</span>' : '');
+        var likeBadge = r.like === '喜欢' ? '<span class="like-badge like-yes">😋喜欢</span>' : (r.like === '不喜欢' ? '<span class="like-badge like-no">😣不喜欢</span>' : '<span class="like-badge like-neutral">😐一般</span>');
         return '<li class="record-item">' +
           (r.time ? '<span class="record-time">' + r.time + '</span>' : '') +
           '<span class="record-detail"><strong>' + r.food + '</strong>' + allergyBadge + likeBadge + (r.note ? ' - ' + r.note : '') + '</span>' +
@@ -1019,25 +1088,14 @@
       }).join('');
     }
 
-    // 已解锁食物
     var allFoods = new Set();
     FOOD_HISTORY.forEach(function(item) {
-      if (item.food && item.food !== '停辅食') {
-        item.food.split('+').forEach(function(n) {
-          var cleaned = n.trim().replace(/（.*?）/g, '').replace(/\(.*?\)/g, '').replace(/[0-9\/]/g, '').trim();
-          if (cleaned) allFoods.add(cleaned);
-        });
-      }
+      extractFoodNames(item.food).forEach(function(f) { allFoods.add(f); });
     });
     var allUserFood = loadData(FOOD_KEY);
     Object.keys(allUserFood).forEach(function(d) {
       (allUserFood[d] || []).forEach(function(r) {
-        if (r.food) {
-          r.food.split('+').forEach(function(n) {
-            var cleaned = n.trim().replace(/（.*?）/g, '').replace(/\(.*?\)/g, '').replace(/[0-9\/]/g, '').trim();
-            if (cleaned) allFoods.add(cleaned);
-          });
-        }
+        extractFoodNames(r.food).forEach(function(f) { allFoods.add(f); });
       });
     });
     cloudEl.innerHTML = '';
@@ -1049,13 +1107,42 @@
     });
     if (allFoods.size === 0) cloudEl.innerHTML = '<span style="color:#999;">暂无记录</span>';
 
+    renderFoodPreferences();
     renderFoodHistory();
     renderAIPrompt();
   }
 
+  function renderFoodPreferences() {
+    var tbody = document.getElementById('foodPreferenceBody');
+    var prefMap = calculateFoodPreferences();
+    var foods = Object.keys(prefMap).sort();
+    
+    if (foods.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="3" style="color:#999;">暂无食材记录</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = foods.map(function(food) {
+      var data = prefMap[food];
+      // 喜爱度评分：喜欢=1，一般=0.5，不喜欢=0
+      // 过敏标记会影响显示
+      var score = (data.like * 1 + data.neutral * 0.5) / data.total;
+      var scorePct = Math.round(score * 100);
+      var likeIcon = score >= 0.8 ? '😍' : (score >= 0.5 ? '😊' : (score >= 0.3 ? '😐' : '😣'));
+      var allergyNote = data.allergy > 0 ? ' ⚠️' : '';
+      return '<tr>' +
+        '<td><strong>' + food + '</strong>' + allergyNote + '</td>' +
+        '<td>' + data.total + ' 次</td>' +
+        '<td>' + likeIcon + ' ' +
+          '<span class="rating-bar-bg"><span class="rating-bar-fill" style="width:' + scorePct + '%;"></span></span> ' +
+          scorePct + '%' +
+        '</td>' +
+      '</tr>';
+    }).join('');
+  }
+
   function renderFoodHistory() {
     var container = document.getElementById('foodHistoryLog');
-    // 合并历史和用户记录
     var allRecords = getAllFoodRecords();
     var html = '';
     allRecords.forEach(function(item) {
@@ -1076,8 +1163,8 @@
   function renderAIPrompt() {
     var promptBox = document.getElementById('aiPromptBox');
     var allRecords = getAllFoodRecords();
+    var prefMap = calculateFoodPreferences();
     
-    // 生成详细记录文本
     var recordsText = '';
     allRecords.forEach(function(item, idx) {
       var allergyStr = item.allergy === '有' ? '⚠️有过敏反应' : '✅无过敏反应';
@@ -1086,6 +1173,16 @@
       else if (item.like === '不喜欢') likeStr = '，宝宝不太喜欢';
       else likeStr = '，宝宝反应一般';
       recordsText += `${idx + 1}. ${item.date}：${item.food}${item.amount ? '（' + item.amount + '）' : ''} - ${allergyStr}${likeStr}${item.note ? '。备注：' + item.note : ''}\n`;
+    });
+
+    // 食材喜爱度总结
+    var preferenceSummary = '';
+    var foods = Object.keys(prefMap).sort();
+    foods.forEach(function(food) {
+      var data = prefMap[food];
+      var score = Math.round(((data.like * 1 + data.neutral * 0.5) / data.total) * 100);
+      var likeDesc = score >= 80 ? '非常喜欢' : (score >= 50 ? '喜欢' : (score >= 30 ? '一般' : '不太喜欢'));
+      preferenceSummary += `- ${food}：共尝试${data.total}次，喜爱度${score}%（${likeDesc}）${data.allergy > 0 ? ' ⚠️有过敏记录' : ''}\n`;
     });
 
     var age = getBabyAgeString();
@@ -1098,9 +1195,12 @@
 【辅食添加记录】
 ${recordsText}
 
+【食材喜爱度统计】
+${preferenceSummary}
+
 【问题】
 基于以上宝宝的情况，接下来一周应该如何安排辅食和喂养策略对宝宝最好？请给出详细的每日建议，包括：
-1. 每天推荐吃什么食物（考虑已解锁食材）
+1. 每天推荐吃什么食物（考虑已解锁食材和宝宝的喜爱度）
 2. 每种食物的量和频率
 3. 需要特别注意的事项（如过敏观察、排便情况等）
 4. 如何帮助宝宝追赶体重增长`;
@@ -1108,17 +1208,14 @@ ${recordsText}
     promptBox.textContent = prompt;
   }
 
-  // 复制Prompt
   document.getElementById('copyPromptBtn').addEventListener('click', function() {
-    var promptBox = document.getElementById('aiPromptBox');
-    var text = promptBox.textContent;
+    var text = document.getElementById('aiPromptBox').textContent;
     if (navigator.clipboard) {
       navigator.clipboard.writeText(text).then(function() {
         document.getElementById('copyFeedback').textContent = '✅ 已复制！';
         setTimeout(function() { document.getElementById('copyFeedback').textContent = ''; }, 2000);
       });
     } else {
-      // Fallback
       var textarea = document.createElement('textarea');
       textarea.value = text;
       document.body.appendChild(textarea);
