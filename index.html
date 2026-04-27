@@ -459,6 +459,22 @@
       background: #f0b860;
       border-radius: 5px;
     }
+    .rank-badge {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #fcead8;
+      color: #c47a3a;
+      font-weight: 700;
+      font-size: 0.7rem;
+      line-height: 20px;
+      text-align: center;
+      margin-right: 4px;
+    }
+    .rank-badge.top1 { background: #ffd700; color: #fff; font-size: 0.8rem; }
+    .rank-badge.top2 { background: #c0c0c0; color: #fff; font-size: 0.8rem; }
+    .rank-badge.top3 { background: #cd7f32; color: #fff; font-size: 0.8rem; }
   </style>
 </head>
 <body>
@@ -604,9 +620,9 @@
         <div class="food-cloud" id="foodCloud"></div>
       </div>
       <div style="margin-top:14px;">
-        <strong>❤️ 食材喜爱度统计：</strong>
+        <strong>🏆 食材喜爱度排行榜：</strong>
         <table class="food-preference-table" id="foodPreferenceTable">
-          <thead><tr><th>食材</th><th>尝试次数</th><th>喜爱度</th></tr></thead>
+          <thead><tr><th>排名</th><th>食材</th><th>尝试次数</th><th>喜爱度</th></tr></thead>
           <tbody id="foodPreferenceBody"></tbody>
         </table>
       </div>
@@ -632,9 +648,9 @@
 <script>
 (function() {
   const BIRTH_DATE = new Date(2025, 9, 7);
-  const MILK_KEY = 'baby_milk_v6';
-  const POOP_KEY = 'baby_poop_v6';
-  const FOOD_KEY = 'baby_food_v6';
+  const MILK_KEY = 'baby_milk_v7';
+  const POOP_KEY = 'baby_poop_v7';
+  const FOOD_KEY = 'baby_food_v7';
   const DAILY_TARGET = 800;
   const ML_TO_OZ = 0.033814;
 
@@ -752,7 +768,6 @@
     return dates;
   }
 
-  // 提取食材名称
   function extractFoodNames(foodStr) {
     if (!foodStr || foodStr === '停辅食') return [];
     return foodStr.split('+').map(function(n) {
@@ -760,7 +775,6 @@
     }).filter(function(n) { return n.length > 0; });
   }
 
-  // 获取所有辅食记录
   function getAllFoodRecords() {
     const all = [];
     FOOD_HISTORY.forEach(function(item) {
@@ -796,7 +810,6 @@
     return all;
   }
 
-  // 计算食材喜爱度
   function calculateFoodPreferences() {
     const allRecords = getAllFoodRecords();
     const foodMap = {};
@@ -816,6 +829,35 @@
     });
 
     return foodMap;
+  }
+
+  // 获取排序后的食材喜爱度列表
+  function getSortedFoodPreferences() {
+    const prefMap = calculateFoodPreferences();
+    const foods = Object.keys(prefMap);
+    
+    // 计算每个食材的评分
+    foods.forEach(function(food) {
+      const data = prefMap[food];
+      data.score = (data.like * 1 + data.neutral * 0.5) / data.total;
+      data.scorePct = Math.round(data.score * 100);
+    });
+
+    // 排序：先按评分降序，平局按尝试次数降序
+    foods.sort(function(a, b) {
+      const scoreDiff = prefMap[b].score - prefMap[a].score;
+      if (Math.abs(scoreDiff) > 0.001) return scoreDiff;
+      // 评分相同，按尝试次数降序
+      return prefMap[b].total - prefMap[a].total;
+    });
+
+    return foods.map(function(food, index) {
+      return {
+        name: food,
+        data: prefMap[food],
+        rank: index + 1
+      };
+    });
   }
 
   // ============ Tab切换 ============
@@ -1114,29 +1156,35 @@
 
   function renderFoodPreferences() {
     var tbody = document.getElementById('foodPreferenceBody');
-    var prefMap = calculateFoodPreferences();
-    var foods = Object.keys(prefMap).sort();
+    var sortedFoods = getSortedFoodPreferences();
     
-    if (foods.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="3" style="color:#999;">暂无食材记录</td></tr>';
+    if (sortedFoods.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="4" style="color:#999;">暂无食材记录</td></tr>';
       return;
     }
 
-    tbody.innerHTML = foods.map(function(food) {
-      var data = prefMap[food];
-      // 喜爱度评分：喜欢=1，一般=0.5，不喜欢=0
-      // 过敏标记会影响显示
-      var score = (data.like * 1 + data.neutral * 0.5) / data.total;
-      var scorePct = Math.round(score * 100);
-      var likeIcon = score >= 0.8 ? '😍' : (score >= 0.5 ? '😊' : (score >= 0.3 ? '😐' : '😣'));
+    tbody.innerHTML = sortedFoods.map(function(item) {
+      var food = item.name;
+      var data = item.data;
+      var rank = item.rank;
+      
+      // 排名徽章样式
+      var rankClass = '';
+      var rankDisplay = rank;
+      if (rank === 1) { rankClass = 'top1'; rankDisplay = '🥇'; }
+      else if (rank === 2) { rankClass = 'top2'; rankDisplay = '🥈'; }
+      else if (rank === 3) { rankClass = 'top3'; rankDisplay = '🥉'; }
+      
+      var likeIcon = data.scorePct >= 80 ? '😍' : (data.scorePct >= 50 ? '😊' : (data.scorePct >= 30 ? '😐' : '😣'));
       var allergyNote = data.allergy > 0 ? ' ⚠️' : '';
+      
       return '<tr>' +
-        '<td><strong>' + food + '</strong>' + allergyNote + '</td>' +
+        '<td><span class="rank-badge ' + rankClass + '">' + rankDisplay + '</span></td>' +
+        '<td style="text-align:left;padding-left:8px;"><strong>' + food + '</strong>' + allergyNote + '</td>' +
         '<td>' + data.total + ' 次</td>' +
         '<td>' + likeIcon + ' ' +
-          '<span class="rating-bar-bg"><span class="rating-bar-fill" style="width:' + scorePct + '%;"></span></span> ' +
-          scorePct + '%' +
-        '</td>' +
+          '<span class="rating-bar-bg"><span class="rating-bar-fill" style="width:' + data.scorePct + '%;"></span></span> ' +
+          data.scorePct + '%</td>' +
       '</tr>';
     }).join('');
   }
@@ -1163,7 +1211,7 @@
   function renderAIPrompt() {
     var promptBox = document.getElementById('aiPromptBox');
     var allRecords = getAllFoodRecords();
-    var prefMap = calculateFoodPreferences();
+    var sortedFoods = getSortedFoodPreferences();
     
     var recordsText = '';
     allRecords.forEach(function(item, idx) {
@@ -1175,14 +1223,11 @@
       recordsText += `${idx + 1}. ${item.date}：${item.food}${item.amount ? '（' + item.amount + '）' : ''} - ${allergyStr}${likeStr}${item.note ? '。备注：' + item.note : ''}\n`;
     });
 
-    // 食材喜爱度总结
     var preferenceSummary = '';
-    var foods = Object.keys(prefMap).sort();
-    foods.forEach(function(food) {
-      var data = prefMap[food];
-      var score = Math.round(((data.like * 1 + data.neutral * 0.5) / data.total) * 100);
-      var likeDesc = score >= 80 ? '非常喜欢' : (score >= 50 ? '喜欢' : (score >= 30 ? '一般' : '不太喜欢'));
-      preferenceSummary += `- ${food}：共尝试${data.total}次，喜爱度${score}%（${likeDesc}）${data.allergy > 0 ? ' ⚠️有过敏记录' : ''}\n`;
+    sortedFoods.forEach(function(item) {
+      var data = item.data;
+      var likeDesc = data.scorePct >= 80 ? '非常喜欢' : (data.scorePct >= 50 ? '喜欢' : (data.scorePct >= 30 ? '一般' : '不太喜欢'));
+      preferenceSummary += `第${item.rank}名 - ${item.name}：共尝试${data.total}次，喜爱度${data.scorePct}%（${likeDesc}）${data.allergy > 0 ? ' ⚠️有过敏记录' : ''}\n`;
     });
 
     var age = getBabyAgeString();
@@ -1195,12 +1240,12 @@
 【辅食添加记录】
 ${recordsText}
 
-【食材喜爱度统计】
+【食材喜爱度排行榜（从高到低）】
 ${preferenceSummary}
 
 【问题】
 基于以上宝宝的情况，接下来一周应该如何安排辅食和喂养策略对宝宝最好？请给出详细的每日建议，包括：
-1. 每天推荐吃什么食物（考虑已解锁食材和宝宝的喜爱度）
+1. 每天推荐吃什么食物（优先推荐宝宝喜爱度高的食材，同时考虑营养均衡）
 2. 每种食物的量和频率
 3. 需要特别注意的事项（如过敏观察、排便情况等）
 4. 如何帮助宝宝追赶体重增长`;
