@@ -363,9 +363,9 @@
 <script>
 (function() {
   const BIRTH_DATE = new Date(2025, 9, 7);
-  const MILK_KEY = 'baby_milk_v8';
-  const POOP_KEY = 'baby_poop_v8';
-  const FOOD_KEY = 'baby_food_v8';
+  const MILK_KEY = 'baby_milk_v9';
+  const POOP_KEY = 'baby_poop_v9';
+  const FOOD_KEY = 'baby_food_v9';
   const DAILY_TARGET = 800;
   const ML_TO_OZ = 0.033814;
 
@@ -435,13 +435,10 @@
       .replace(/（.*?）/g, '').replace(/\(.*?\)/g, '')
       .replace(/[0-9\/\s]+/g, ' ').trim()
       .replace(/\s+/g, ' ');
-    // 先尝试直接映射
     if (FOOD_CANONICAL_MAP[cleaned]) return FOOD_CANONICAL_MAP[cleaned];
-    // 部分匹配
     for (const [key, val] of Object.entries(FOOD_CANONICAL_MAP)) {
       if (cleaned.includes(key) || key.includes(cleaned)) return val;
     }
-    // 如果包含"小米"
     if (cleaned.includes('小米')) return '小米';
     return raw.trim();
   }
@@ -452,7 +449,6 @@
     const names = [];
     parts.forEach(function(part) {
       let cleaned = part.trim();
-      // 提取中文+英文词
       const match = cleaned.match(/[\u4e00-\u9fa5a-zA-Z]+/g);
       if (match) {
         match.forEach(function(w) {
@@ -741,7 +737,6 @@
         return `<li class="record-item">${r.time?`<span class="record-time">${r.time}</span>`:''}<span class="record-detail"><strong>${r.food}</strong>${ab}${lb}${r.note?` - ${r.note}`:''}</span><button class="delete-btn" data-type="food" data-index="${origIdx}">✕</button></li>`;
       }).join('');
     }
-    // 已解锁食物
     const allFoods = new Set();
     getAllFoodRecords().forEach(r=>{ extractFoodNames(r.food).forEach(f=>allFoods.add(f)); });
     const cloudEl = document.getElementById('foodCloud');
@@ -795,7 +790,7 @@
     });
     const age = getBabyAgeString();
     document.getElementById('aiPromptBox').textContent = 
-      `【宝宝喂养背景】\n- 出生体重：2430g\n- 当前月龄：${age}（约6个月）\n- 当前体重：14.7 lbs（约6.67kg）\n\n【辅食添加记录】\n${recordsText}\n【食材喜爱度排行榜（从高到低）】\n${ps}\n【问题】\n基于以上宝宝的情况，接下来一周应该如何安排辅食和喂养策略对宝宝最好？请给出详细的每日建议，包括：\n1. 每天推荐吃什么食物（优先推荐宝宝喜爱度高的食材，同时考虑营养均衡）\n2. 每种食物的量和频率\n3. 需要特别注意的事项（如过敏观察、排便情况等）\n4. 如何帮助宝宝追赶体重增长`;
+      `【宝宝喂养背景】\n- 出生体重：2430g\n- 当前月龄：${age}（约6个月）\n- 最近一次儿保称重（4/14）：14.7 lbs（约6.67kg）\n\n【辅食添加记录】\n${recordsText}\n【食材喜爱度排行榜（从高到低）】\n${ps}\n【问题】\n基于以上宝宝的情况，接下来一周应该如何安排辅食和喂养策略对宝宝最好？请给出详细的每日建议，包括：\n1. 每天推荐吃什么食物（以优先增重和营养均衡搭配为原则，不必局限于宝宝喜爱度高的食材）\n2. 每种食物的量和频率\n3. 需要特别注意的事项（如过敏观察、排便情况等）\n4. 如何帮助宝宝追赶体重增长`;
   }
   document.getElementById('copyPromptBtn').addEventListener('click', ()=>{
     const text = document.getElementById('aiPromptBox').textContent;
