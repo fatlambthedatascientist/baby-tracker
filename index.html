@@ -167,7 +167,7 @@
     .like-neutral { background: #e8e8e8; color: #555; }
     .prompt-box {
       background: #f8f4ee; border-radius: 16px; padding: 16px; margin: 14px 0;
-      font-size: 0.85rem; line-height: 1.8; max-height: 300px; overflow-y: auto;
+      font-size: 0.85rem; line-height: 1.8; max-height: 400px; overflow-y: auto;
       white-space: pre-wrap; border: 1px solid #e8dccf;
     }
     .copy-btn {
@@ -350,7 +350,7 @@
     </div>
     <div class="card">
       <div class="card-header"><div class="card-title food-color">📖 辅食历史日志</div></div>
-      <div id="foodHistoryLog" style="font-size:0.85rem;max-height:300px;overflow-y:auto;"></div>
+      <div id="foodHistoryLog" style="font-size:0.85rem;max-height:400px;overflow-y:auto;"></div>
     </div>
     <div class="card">
       <div class="card-header"><div class="card-title food-color">🤖 AI喂养建议Prompt</div></div>
@@ -376,6 +376,8 @@
     return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
   }
   let currentDateStr = getLocalDateString();
+  console.log("🚀 初始化，当前日期:", currentDateStr);
+  
   function dateFromString(s) { const p=s.split('-'); return new Date(+p[0],+p[1]-1,+p[2]); }
 
   const FOOD_HISTORY = [
@@ -499,7 +501,6 @@
     saveData(key, all);
   }
   
-  // 获取近N天但不包括今天的日期列表
   function getLastNDatesExcludingToday(n, endDateStr) {
     const dates = [];
     const endDate = dateFromString(endDateStr);
@@ -509,7 +510,6 @@
       const ds = `${dd.getFullYear()}-${String(dd.getMonth()+1).padStart(2,'0')}-${String(dd.getDate()).padStart(2,'0')}`;
       if (ds !== endDateStr) dates.push(ds);
     }
-    // 确保返回正好n天（如果endDateStr在范围内，排除后可能少一天，从更早补充）
     while (dates.length < n) {
       const lastDate = dateFromString(dates[0] || endDateStr);
       lastDate.setDate(lastDate.getDate() - 1);
@@ -520,7 +520,6 @@
     return dates.slice(0, n);
   }
 
-  // 获取近N天包括今天的日期列表（用于图表）
   function getLastNDates(n, endDateStr) {
     const dates = [];
     const endDate = dateFromString(endDateStr);
@@ -536,20 +535,27 @@
     const all = [];
     FOOD_HISTORY.forEach(function(item) {
       if (item.food && item.food !== '停辅食') {
-        all.push({ date:item.date, age:item.age, food:item.food, amount:item.amount,
-                    note:item.note, allergy:item.allergy||'无', like:item.like||'一般', time:item.time||'', source:'history' });
+        all.push({ 
+          date:item.date, age:item.age, food:item.food, amount:item.amount,
+          note:item.note, allergy:item.allergy||'无', like:item.like||'一般', 
+          time:item.time||'', source:'history' 
+        });
       }
     });
     const userData = loadData(FOOD_KEY);
     Object.keys(userData).forEach(function(ds) {
       (userData[ds]||[]).forEach(function(r) {
-        all.push({ date:ds, age:'', food:r.food, amount:'', note:r.note||'',
-                    allergy:r.allergy||'无', like:r.like||'一般', time:r.time||'', source:'user' });
+        all.push({ 
+          date:ds, age:'', food:r.food, amount:'', note:r.note||'',
+          allergy:r.allergy||'无', like:r.like||'一般', 
+          time:r.time||'', source:'user' 
+        });
       });
     });
     all.sort((a,b)=>a.date.localeCompare(b.date));
     return all;
   }
+
   function calculateFoodPreferences() {
     const allRecords = getAllFoodRecords();
     const foodMap = {};
@@ -566,6 +572,7 @@
     });
     return foodMap;
   }
+
   function getSortedFoodPreferences() {
     const prefMap = calculateFoodPreferences();
     const foods = Object.keys(prefMap);
@@ -625,6 +632,7 @@
 
   // ============ 喂奶渲染 ============
   function renderMilk() {
+    console.log("🍼 渲染喂奶模块，日期:", currentDateStr);
     const records = getDayRecords(MILK_KEY, currentDateStr);
     const listEl = document.getElementById('milkRecordList');
     const totalEl = document.getElementById('milkTotalDisplay');
@@ -660,10 +668,8 @@
     chartEl.innerHTML = html;
   }
   function renderMilkAvg() {
-    // 近7天日均不包括今天
     const last7ExclToday = getLastNDatesExcludingToday(7, currentDateStr);
-    // 前一周也不包括今天
-    const prev7ExclToday = getLastNDatesExcludingToday(7, dateFromString(last7ExclToday[0] || currentDateStr));
+    const prev7ExclToday = getLastNDatesExcludingToday(7, last7ExclToday[0] || currentDateStr);
     const calcAvg = (dates)=>{
       let t=0,c=0;
       dates.forEach(ds=>{ const recs=getDayRecords(MILK_KEY,ds); t+=recs.reduce((s,r)=>s+(Number(r.amount)||0),0); c++; });
@@ -691,6 +697,7 @@
 
   // ============ 粑粑渲染 ============
   function renderPoop() {
+    console.log("💩 渲染粑粑模块");
     const records = getDayRecords(POOP_KEY, currentDateStr);
     const listEl = document.getElementById('poopRecordList');
     const countEl = document.getElementById('poopCountDisplay');
@@ -753,6 +760,7 @@
 
   // ============ 辅食渲染 ============
   function renderFood() {
+    console.log("🥄 渲染辅食模块，日期:", currentDateStr);
     const records = getDayRecords(FOOD_KEY, currentDateStr);
     const listEl = document.getElementById('foodRecordList');
     if (records.length===0) {
@@ -777,6 +785,7 @@
     renderAIPrompt();
   }
   function renderFoodPreferences() {
+    console.log("🏆 渲染喜爱度排行榜");
     const tbody = document.getElementById('foodPreferenceBody');
     const sorted = getSortedFoodPreferences();
     if (sorted.length===0) { tbody.innerHTML='<tr><td colspan="4" style="color:#999;">暂无食材记录</td></tr>'; return; }
@@ -790,16 +799,30 @@
     }).join('');
   }
   function renderFoodHistory() {
+    console.log("📖 渲染历史日志");
     const container = document.getElementById('foodHistoryLog');
     const allRecords = getAllFoodRecords();
-    container.innerHTML = allRecords.length===0 ? '<div style="color:#999;text-align:center;padding:20px;">暂无记录</div>' : 
-      allRecords.map(item=>{
-        const ab = item.allergy==='有'?' ⚠️过敏':' ✅无过敏';
-        const ls = item.like==='喜欢'?' 😋喜欢':(item.like==='不喜欢'?' 😣不喜欢':' 😐一般');
-        return `<div class="food-log-item"><span class="food-log-date">${item.date}</span>${item.age?` <span style="color:#888;">${item.age}</span>`:''}${item.time?` <span style="color:#999;">${item.time}</span>`:''}<br><strong>${item.food}</strong>${item.amount?` · ${item.amount}`:''}<br><span style="color:#666;">${item.note}</span><br><span style="font-size:0.75rem;">${ab}${ls}</span></div>`;
-      }).join('');
+    if (allRecords.length===0) {
+      container.innerHTML = '<div style="color:#999;text-align:center;padding:20px;">暂无辅食记录</div>';
+      return;
+    }
+    container.innerHTML = allRecords.map(item=>{
+      const ab = item.allergy==='有'?' ⚠️过敏':' ✅无过敏';
+      const ls = item.like==='喜欢'?' 😋喜欢':(item.like==='不喜欢'?' 😣不喜欢':' 😐一般');
+      return `<div class="food-log-item">
+        <span class="food-log-date">${item.date}</span>
+        ${item.age ? ` <span style="color:#888;">${item.age}</span>` : ''}
+        ${item.time ? ` <span style="color:#999;">${item.time}</span>` : ''}
+        <br><strong>${item.food}</strong>
+        ${item.amount ? ` · ${item.amount}` : ''}
+        <br><span style="color:#666;">${item.note}</span>
+        <br><span style="font-size:0.75rem;">${ab}${ls}</span>
+      </div>`;
+    }).join('');
+    console.log("📖 历史日志条目数:", allRecords.length);
   }
   function renderAIPrompt() {
+    console.log("🤖 渲染AI Prompt");
     const allRecords = getAllFoodRecords();
     let recordsText = '';
     allRecords.forEach((item,idx)=>{
@@ -811,7 +834,8 @@
       recordsText += `${idx+1}. ${item.date}${item.time?' '+item.time:''}：${item.food}${item.amount?`（${item.amount}）`:''} - ${as}${ls}${item.note?`。备注：${item.note}`:''}\n`;
     });
     const age = getBabyAgeString();
-    document.getElementById('aiPromptBox').textContent = 
+    const promptBox = document.getElementById('aiPromptBox');
+    promptBox.textContent = 
       `【宝宝喂养背景】
 - 出生体重：2430g
 - 当前月龄：${age}（约6个月）
@@ -831,6 +855,7 @@ ${recordsText}
 2. 每种食物的量和频率如何安排？
 3. 如何帮助宝宝增长体重？
 4. 需要特别注意的事项`;
+    console.log("🤖 AI Prompt已生成，长度:", promptBox.textContent.length);
   }
   document.getElementById('copyPromptBtn').addEventListener('click', ()=>{
     const text = document.getElementById('aiPromptBox').textContent;
@@ -886,6 +911,7 @@ ${recordsText}
   });
 
   function renderAll() {
+    console.log("🔄 开始全局渲染，日期:", currentDateStr);
     document.getElementById('dateDisplay').textContent = getDisplayDate(currentDateStr);
     document.getElementById('babyAge').textContent = '🎂 ' + getBabyAgeString();
     const isToday = currentDateStr === getLocalDateString();
@@ -893,8 +919,13 @@ ${recordsText}
     document.getElementById('milkTimeInput').value = isToday ? nt : '12:00';
     document.getElementById('poopTimeInput').value = isToday ? nt : '12:00';
     document.getElementById('foodTimeInput').value = isToday ? nt : '12:00';
-    renderMilk(); renderPoop(); renderFood();
+    renderMilk(); 
+    renderPoop(); 
+    renderFood();
+    console.log("✅ 全局渲染完成");
   }
+  
+  console.log("🚀 开始初始渲染");
   renderAll();
 })();
 </script>
