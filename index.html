@@ -264,7 +264,7 @@
         <span class="summary-value milk-color-text" id="milkTotalDisplay">0 ml</span>
       </div>
       <div class="avg-row" id="milkAvgRow">
-        <span>📊 近7天日均</span>
+        <span>📊 近7天日均（不含今天）</span>
         <span id="milk7DayAvg">--</span>
         <span id="milk7DayAvgOz" class="oz-convert"></span>
         <span class="avg-change" id="milkAvgChange">--</span>
@@ -317,6 +317,7 @@
     <div class="card">
       <div class="card-header"><div class="card-title food-color">🥄 辅食记录</div></div>
       <div class="input-row">
+        <input type="time" id="foodTimeInput" value="12:00">
         <input type="text" id="foodItemInput" placeholder="食物名称（如：胡萝卜泥）">
       </div>
       <div class="input-row">
@@ -363,9 +364,9 @@
 <script>
 (function() {
   const BIRTH_DATE = new Date(2025, 9, 7);
-  const MILK_KEY = 'baby_milk_v9';
-  const POOP_KEY = 'baby_poop_v9';
-  const FOOD_KEY = 'baby_food_v9';
+  const MILK_KEY = 'baby_milk_v10';
+  const POOP_KEY = 'baby_poop_v10';
+  const FOOD_KEY = 'baby_food_v10';
   const DAILY_TARGET = 800;
   const ML_TO_OZ = 0.033814;
 
@@ -378,36 +379,36 @@
   function dateFromString(s) { const p=s.split('-'); return new Date(+p[0],+p[1]-1,+p[2]); }
 
   const FOOD_HISTORY = [
-    { day:1, date:'3.22', age:'5个月16天', food:'Gerber燕麦糊', amount:'1勺半', note:'平静吃完，无不良反应', allergy:'无', like:'喜欢' },
-    { day:2, date:'3.23', age:'5个月17天', food:'Gerber燕麦糊', amount:'3小勺', note:'略有兴趣，无不良反应，粑粑绿色较稀', allergy:'无', like:'一般' },
-    { day:3, date:'3.24', age:'5个月18天', food:'Gerber燕麦糊', amount:'6小勺', note:'很有兴趣，BLW自己拿勺子吃', allergy:'无', like:'喜欢' },
-    { day:4, date:'3.25', age:'5个月19天', food:'Gerber燕麦糊', amount:'', note:'绿色稀粑粑', allergy:'无', like:'一般' },
-    { day:5, date:'3.26', age:'5个月20天', food:'Gerber燕麦糊', amount:'', note:'无症状', allergy:'无', like:'喜欢' },
-    { day:6, date:'3.27', age:'5个月21天', food:'胡萝卜泥', amount:'', note:'没过敏，吃完拉了三次粑粑，很稀', allergy:'无', like:'喜欢' },
-    { day:7, date:'3.28', age:'5个月22天', food:'Gerber燕麦糊', amount:'', note:'拉了黄色粑粑，较稀', allergy:'无', like:'喜欢' },
-    { day:8, date:'3.29', age:'5个月23天', food:'Gerber燕麦糊', amount:'', note:'吃的开心，没有不良反应', allergy:'无', like:'喜欢' },
-    { day:9, date:'3.30', age:'5个月24天', food:'Gerber燕麦糊', amount:'两小勺', note:'拉了粑粑，稀', allergy:'无', like:'喜欢' },
-    { day:10, date:'3.30-4.1', age:'', food:'停辅食', amount:'', note:'观察休养', allergy:'无', like:'一般' },
-    { day:12, date:'4.2', age:'5个月27天', food:'Earth Best燕麦糊', amount:'两小勺', note:'绿色粘稠糊糊', allergy:'无', like:'喜欢' },
-    { day:13, date:'4.3', age:'5个月28天', food:'胡萝卜小米糊糊', amount:'6小勺尖尖', note:'喜欢吃，没有拉粑粑', allergy:'无', like:'喜欢' },
-    { day:14, date:'4.4', age:'', food:'胡萝卜糊糊', amount:'', note:'第三次吃，喜欢吃', allergy:'无', like:'喜欢' },
-    { day:15, date:'4.5', age:'', food:'胡萝卜糊糊', amount:'', note:'黄绿色细腻粑粑，好转', allergy:'无', like:'喜欢' },
-    { day:16, date:'4.6', age:'', food:'红薯泥', amount:'', note:'第一次吃，喜欢吃', allergy:'无', like:'喜欢' },
-    { day:17, date:'4.7', age:'', food:'红薯泥', amount:'', note:'第二次，喜欢', allergy:'无', like:'喜欢' },
-    { day:18, date:'4.8', age:'', food:'红薯泥', amount:'', note:'第三次，糊糊状黄绿色粑粑', allergy:'无', like:'喜欢' },
-    { day:19, date:'4.9', age:'', food:'牛油果', amount:'', note:'第一次吃，喜欢吃', allergy:'无', like:'喜欢' },
-    { day:20, date:'4.10', age:'', food:'牛油果+燕麦糊', amount:'', note:'第二次牛油果', allergy:'无', like:'喜欢' },
-    { day:21, date:'4.11', age:'', food:'牛油果', amount:'', note:'第三次，无不良反应', allergy:'无', like:'喜欢' },
-    { day:22, date:'4.12', age:'', food:'燕麦糊', amount:'', note:'无不良反应', allergy:'无', like:'喜欢' },
-    { day:23, date:'4.13', age:'', food:'牛肉', amount:'', note:'第一次吃，喜欢', allergy:'无', like:'喜欢' },
-    { day:24, date:'4.14', age:'', food:'牛肉', amount:'', note:'第二次，打疫苗，晚上发烧', allergy:'无', like:'一般' },
-    { day:25, date:'4.15', age:'', food:'燕麦糊', amount:'', note:'黄绿色细腻粑粑', allergy:'无', like:'喜欢' },
-    { day:26, date:'4.16', age:'', food:'牛油果+燕麦糊', amount:'', note:'上午下午各一顿', allergy:'无', like:'喜欢' },
-    { day:27, date:'4.17', age:'', food:'牛肉+燕麦糊', amount:'', note:'下午吃了一顿', allergy:'无', like:'喜欢' },
-    { day:28, date:'4.18', age:'', food:'蛋黄（1/5）+燕麦糊', amount:'', note:'第一次蛋黄，黄色粑粑', allergy:'无', like:'一般' },
-    { day:29, date:'4.19', age:'', food:'鸡蛋', amount:'', note:'第二次，无不良反应', allergy:'无', like:'喜欢' },
-    { day:30, date:'4.20', age:'', food:'蛋黄糊糊+燕麦糊', amount:'', note:'第三次蛋黄，黄色粘稠细腻粑粑', allergy:'无', like:'喜欢' },
-    { day:31, date:'4.21', age:'', food:'鸡肉+燕麦糊', amount:'', note:'第一次鸡肉，黄稠臭粑粑', allergy:'无', like:'喜欢' },
+    { day:1, date:'3.22', age:'5个月16天', food:'Gerber燕麦糊', amount:'1勺半', note:'平静吃完，无不良反应', allergy:'无', like:'喜欢', time:'11:00' },
+    { day:2, date:'3.23', age:'5个月17天', food:'Gerber燕麦糊', amount:'3小勺', note:'略有兴趣，无不良反应，粑粑绿色较稀', allergy:'无', like:'一般', time:'11:00' },
+    { day:3, date:'3.24', age:'5个月18天', food:'Gerber燕麦糊', amount:'6小勺', note:'很有兴趣，BLW自己拿勺子吃', allergy:'无', like:'喜欢', time:'11:00' },
+    { day:4, date:'3.25', age:'5个月19天', food:'Gerber燕麦糊', amount:'', note:'绿色稀粑粑', allergy:'无', like:'一般', time:'11:00' },
+    { day:5, date:'3.26', age:'5个月20天', food:'Gerber燕麦糊', amount:'', note:'无症状', allergy:'无', like:'喜欢', time:'11:00' },
+    { day:6, date:'3.27', age:'5个月21天', food:'胡萝卜泥', amount:'', note:'没过敏，吃完拉了三次粑粑，很稀', allergy:'无', like:'喜欢', time:'11:00' },
+    { day:7, date:'3.28', age:'5个月22天', food:'Gerber燕麦糊', amount:'', note:'拉了黄色粑粑，较稀', allergy:'无', like:'喜欢', time:'11:00' },
+    { day:8, date:'3.29', age:'5个月23天', food:'Gerber燕麦糊', amount:'', note:'吃的开心，没有不良反应', allergy:'无', like:'喜欢', time:'11:00' },
+    { day:9, date:'3.30', age:'5个月24天', food:'Gerber燕麦糊', amount:'两小勺', note:'拉了粑粑，稀', allergy:'无', like:'喜欢', time:'11:00' },
+    { day:10, date:'3.30-4.1', age:'', food:'停辅食', amount:'', note:'观察休养', allergy:'无', like:'一般', time:'' },
+    { day:12, date:'4.2', age:'5个月27天', food:'Earth Best燕麦糊', amount:'两小勺', note:'绿色粘稠糊糊', allergy:'无', like:'喜欢', time:'11:00' },
+    { day:13, date:'4.3', age:'5个月28天', food:'胡萝卜小米糊糊', amount:'6小勺尖尖', note:'喜欢吃，没有拉粑粑', allergy:'无', like:'喜欢', time:'11:00' },
+    { day:14, date:'4.4', age:'', food:'胡萝卜糊糊', amount:'', note:'第三次吃，喜欢吃', allergy:'无', like:'喜欢', time:'11:00' },
+    { day:15, date:'4.5', age:'', food:'胡萝卜糊糊', amount:'', note:'黄绿色细腻粑粑，好转', allergy:'无', like:'喜欢', time:'11:00' },
+    { day:16, date:'4.6', age:'', food:'红薯泥', amount:'', note:'第一次吃，喜欢吃', allergy:'无', like:'喜欢', time:'11:00' },
+    { day:17, date:'4.7', age:'', food:'红薯泥', amount:'', note:'第二次，喜欢', allergy:'无', like:'喜欢', time:'11:00' },
+    { day:18, date:'4.8', age:'', food:'红薯泥', amount:'', note:'第三次，糊糊状黄绿色粑粑', allergy:'无', like:'喜欢', time:'11:00' },
+    { day:19, date:'4.9', age:'', food:'牛油果', amount:'', note:'第一次吃，喜欢吃', allergy:'无', like:'喜欢', time:'11:00' },
+    { day:20, date:'4.10', age:'', food:'牛油果+燕麦糊', amount:'', note:'第二次牛油果', allergy:'无', like:'喜欢', time:'11:00' },
+    { day:21, date:'4.11', age:'', food:'牛油果', amount:'', note:'第三次，无不良反应', allergy:'无', like:'喜欢', time:'11:00' },
+    { day:22, date:'4.12', age:'', food:'燕麦糊', amount:'', note:'无不良反应', allergy:'无', like:'喜欢', time:'11:00' },
+    { day:23, date:'4.13', age:'', food:'牛肉', amount:'', note:'第一次吃，喜欢', allergy:'无', like:'喜欢', time:'11:00' },
+    { day:24, date:'4.14', age:'', food:'牛肉', amount:'', note:'第二次，打疫苗，晚上发烧', allergy:'无', like:'一般', time:'11:00' },
+    { day:25, date:'4.15', age:'', food:'燕麦糊', amount:'', note:'黄绿色细腻粑粑', allergy:'无', like:'喜欢', time:'11:00' },
+    { day:26, date:'4.16', age:'', food:'牛油果+燕麦糊', amount:'', note:'上午下午各一顿', allergy:'无', like:'喜欢', time:'11:00' },
+    { day:27, date:'4.17', age:'', food:'牛肉+燕麦糊', amount:'', note:'下午吃了一顿', allergy:'无', like:'喜欢', time:'17:00' },
+    { day:28, date:'4.18', age:'', food:'蛋黄（1/5）+燕麦糊', amount:'', note:'第一次蛋黄，黄色粑粑', allergy:'无', like:'一般', time:'11:00' },
+    { day:29, date:'4.19', age:'', food:'鸡蛋', amount:'', note:'第二次，无不良反应', allergy:'无', like:'喜欢', time:'11:00' },
+    { day:30, date:'4.20', age:'', food:'蛋黄糊糊+燕麦糊', amount:'', note:'第三次蛋黄，黄色粘稠细腻粑粑', allergy:'无', like:'喜欢', time:'11:00' },
+    { day:31, date:'4.21', age:'', food:'鸡肉+燕麦糊', amount:'', note:'第一次鸡肉，黄稠臭粑粑', allergy:'无', like:'喜欢', time:'11:00' },
   ];
 
   // ============ 食物名称整合映射 ============
@@ -497,28 +498,53 @@
     else all[dateStr] = records;
     saveData(key, all);
   }
+  
+  // 获取近N天但不包括今天的日期列表
+  function getLastNDatesExcludingToday(n, endDateStr) {
+    const dates = [];
+    const endDate = dateFromString(endDateStr);
+    for (let i = n; i >= 1; i--) {
+      const dd = new Date(endDate);
+      dd.setDate(dd.getDate() - i);
+      const ds = `${dd.getFullYear()}-${String(dd.getMonth()+1).padStart(2,'0')}-${String(dd.getDate()).padStart(2,'0')}`;
+      if (ds !== endDateStr) dates.push(ds);
+    }
+    // 确保返回正好n天（如果endDateStr在范围内，排除后可能少一天，从更早补充）
+    while (dates.length < n) {
+      const lastDate = dateFromString(dates[0] || endDateStr);
+      lastDate.setDate(lastDate.getDate() - 1);
+      const ds = `${lastDate.getFullYear()}-${String(lastDate.getMonth()+1).padStart(2,'0')}-${String(lastDate.getDate()).padStart(2,'0')}`;
+      if (ds !== endDateStr) dates.unshift(ds);
+      else break;
+    }
+    return dates.slice(0, n);
+  }
+
+  // 获取近N天包括今天的日期列表（用于图表）
   function getLastNDates(n, endDateStr) {
     const dates = [];
     const endDate = dateFromString(endDateStr);
-    for (let i = n-1; i >= 0; i--) {
-      const dd = new Date(endDate); dd.setDate(dd.getDate()-i);
+    for (let i = n - 1; i >= 0; i--) {
+      const dd = new Date(endDate);
+      dd.setDate(dd.getDate() - i);
       dates.push(`${dd.getFullYear()}-${String(dd.getMonth()+1).padStart(2,'0')}-${String(dd.getDate()).padStart(2,'0')}`);
     }
     return dates;
   }
+
   function getAllFoodRecords() {
     const all = [];
     FOOD_HISTORY.forEach(function(item) {
       if (item.food && item.food !== '停辅食') {
         all.push({ date:item.date, age:item.age, food:item.food, amount:item.amount,
-                    note:item.note, allergy:item.allergy||'无', like:item.like||'一般', source:'history' });
+                    note:item.note, allergy:item.allergy||'无', like:item.like||'一般', time:item.time||'', source:'history' });
       }
     });
     const userData = loadData(FOOD_KEY);
     Object.keys(userData).forEach(function(ds) {
       (userData[ds]||[]).forEach(function(r) {
         all.push({ date:ds, age:'', food:r.food, amount:'', note:r.note||'',
-                    allergy:r.allergy||'无', like:r.like||'一般', source:'user' });
+                    allergy:r.allergy||'无', like:r.like||'一般', time:r.time||'', source:'user' });
       });
     });
     all.sort((a,b)=>a.date.localeCompare(b.date));
@@ -634,14 +660,17 @@
     chartEl.innerHTML = html;
   }
   function renderMilkAvg() {
-    const last7 = getLastNDates(7, currentDateStr);
-    const prev7 = getLastNDates(14, currentDateStr).slice(0,7);
+    // 近7天日均不包括今天
+    const last7ExclToday = getLastNDatesExcludingToday(7, currentDateStr);
+    // 前一周也不包括今天
+    const prev7ExclToday = getLastNDatesExcludingToday(7, dateFromString(last7ExclToday[0] || currentDateStr));
     const calcAvg = (dates)=>{
       let t=0,c=0;
       dates.forEach(ds=>{ const recs=getDayRecords(MILK_KEY,ds); t+=recs.reduce((s,r)=>s+(Number(r.amount)||0),0); c++; });
       return c>0?Math.round(t/c):0;
     };
-    const tw = calcAvg(last7), pw = calcAvg(prev7);
+    const tw = calcAvg(last7ExclToday);
+    const pw = calcAvg(prev7ExclToday);
     document.getElementById('milk7DayAvg').textContent = `${tw} ml`;
     document.getElementById('milk7DayAvgOz').textContent = `（≈ ${mlToOz(tw)} oz）`;
     const ce = document.getElementById('milkAvgChange');
@@ -729,7 +758,7 @@
     if (records.length===0) {
       listEl.innerHTML = '<li class="empty-msg">今天还没有辅食记录</li>';
     } else {
-      const sorted = records.slice().sort((a,b)=>a.time?a.time.localeCompare(b.time):0);
+      const sorted = records.slice().sort((a,b)=>(a.time||'').localeCompare(b.time||''));
       listEl.innerHTML = sorted.map(r=>{
         const origIdx = records.indexOf(r);
         const ab = r.allergy==='有'?'<span class="allergy-badge allergy-warn">⚠️过敏</span>':'<span class="allergy-badge allergy-safe">✅无过敏</span>';
@@ -767,12 +796,11 @@
       allRecords.map(item=>{
         const ab = item.allergy==='有'?' ⚠️过敏':' ✅无过敏';
         const ls = item.like==='喜欢'?' 😋喜欢':(item.like==='不喜欢'?' 😣不喜欢':' 😐一般');
-        return `<div class="food-log-item"><span class="food-log-date">${item.date}</span>${item.age?` <span style="color:#888;">${item.age}</span>`:''}<br><strong>${item.food}</strong>${item.amount?` · ${item.amount}`:''}<br><span style="color:#666;">${item.note}</span><br><span style="font-size:0.75rem;">${ab}${ls}</span></div>`;
+        return `<div class="food-log-item"><span class="food-log-date">${item.date}</span>${item.age?` <span style="color:#888;">${item.age}</span>`:''}${item.time?` <span style="color:#999;">${item.time}</span>`:''}<br><strong>${item.food}</strong>${item.amount?` · ${item.amount}`:''}<br><span style="color:#666;">${item.note}</span><br><span style="font-size:0.75rem;">${ab}${ls}</span></div>`;
       }).join('');
   }
   function renderAIPrompt() {
     const allRecords = getAllFoodRecords();
-    const sorted = getSortedFoodPreferences();
     let recordsText = '';
     allRecords.forEach((item,idx)=>{
       const as = item.allergy==='有'?'⚠️有过敏反应':'✅无过敏反应';
@@ -780,17 +808,29 @@
       if(item.like==='喜欢') ls='，宝宝喜欢吃';
       else if(item.like==='不喜欢') ls='，宝宝不太喜欢';
       else ls='，宝宝反应一般';
-      recordsText += `${idx+1}. ${item.date}：${item.food}${item.amount?`（${item.amount}）`:''} - ${as}${ls}${item.note?`。备注：${item.note}`:''}\n`;
-    });
-    let ps = '';
-    sorted.forEach(item=>{
-      const d=item.data;
-      const ld = d.scorePct>=80?'非常喜欢':(d.scorePct>=50?'喜欢':(d.scorePct>=30?'一般':'不太喜欢'));
-      ps += `第${item.rank}名 - ${item.name}：共尝试${d.total}次，喜爱度${d.scorePct}%（${ld}）${d.allergy>0?' ⚠️有过敏记录':''}\n`;
+      recordsText += `${idx+1}. ${item.date}${item.time?' '+item.time:''}：${item.food}${item.amount?`（${item.amount}）`:''} - ${as}${ls}${item.note?`。备注：${item.note}`:''}\n`;
     });
     const age = getBabyAgeString();
     document.getElementById('aiPromptBox').textContent = 
-      `【宝宝喂养背景】\n- 出生体重：2430g\n- 当前月龄：${age}（约6个月）\n- 最近一次儿保称重（4/14）：14.7 lbs（约6.67kg）\n\n【辅食添加记录】\n${recordsText}\n【食材喜爱度排行榜（从高到低）】\n${ps}\n【问题】\n基于以上宝宝的情况，接下来一周应该如何安排辅食和喂养策略对宝宝最好？请给出详细的每日建议，包括：\n1. 每天推荐吃什么食物（以优先增重和营养均衡搭配为原则，不必局限于宝宝喜爱度高的食材）\n2. 每种食物的量和频率\n3. 需要特别注意的事项（如过敏观察、排便情况等）\n4. 如何帮助宝宝追赶体重增长`;
+      `【宝宝喂养背景】
+- 出生体重：2430g
+- 当前月龄：${age}（约6个月）
+- 最近一次儿保称重（4/14）：14.7 lbs（约6.67kg）
+
+【辅食添加记录】
+${recordsText}
+
+【喂养原则】
+- 每天上午第一顿是实验辅食（11:00左右），测试新食材，观察过敏反应
+- 每天下午第二顿专注增长体重（17:00左右），以高热量食材为主（牛肉、牛油果等）
+- 注意营养均衡搭配
+
+【问题】
+基于以上宝宝的情况，接下来一周应该如何安排辅食和喂养策略？请给出详细建议：
+1. 每天两顿辅食分别推荐吃什么食物？（上午实验新食材，下午专注增重）
+2. 每种食物的量和频率如何安排？
+3. 如何帮助宝宝增长体重？
+4. 需要特别注意的事项`;
   }
   document.getElementById('copyPromptBtn').addEventListener('click', ()=>{
     const text = document.getElementById('aiPromptBox').textContent;
@@ -806,6 +846,7 @@
     }
   });
   document.getElementById('addFoodBtn').addEventListener('click', ()=>{
+    const time = document.getElementById('foodTimeInput').value;
     const food = document.getElementById('foodItemInput').value.trim();
     const allergy = document.getElementById('foodAllergySelect').value;
     const like = document.getElementById('foodLikeSelect').value;
@@ -815,8 +856,9 @@
       if (!note) { alert('请描述过敏细节'); return; }
     }
     if (!food) { alert('请输入食物名称'); return; }
+    if (!time) { alert('请选择时间'); return; }
     const records = getDayRecords(FOOD_KEY, currentDateStr);
-    records.push({time:getNowTime(), food, allergy, like, note});
+    records.push({time: time, food, allergy, like, note});
     setDayRecords(FOOD_KEY, currentDateStr, records);
     document.getElementById('foodItemInput').value='';
     document.getElementById('foodNoteInput').value='';
@@ -850,6 +892,7 @@
     const nt = getNowTime();
     document.getElementById('milkTimeInput').value = isToday ? nt : '12:00';
     document.getElementById('poopTimeInput').value = isToday ? nt : '12:00';
+    document.getElementById('foodTimeInput').value = isToday ? nt : '12:00';
     renderMilk(); renderPoop(); renderFood();
   }
   renderAll();
